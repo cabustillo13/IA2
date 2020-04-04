@@ -22,9 +22,6 @@ def generate_neighbours(node_current,mapa):
         if (0 <= x[0]+a[0] < (len(mapa))) and (0 <= x[1]+a[1] < (len(mapa[0]))) and mapa[x[0]+a[0], x[1]+a[1]]==0:
             
             neighbours_pos = [x[0]+a[0], x[1]+a[1]]
-            
-            #n=Node(neighbours_pos)
-            #Neighbours.append(Node(neighbours_pos)) 
             Neighbours.append(Node(neighbours_pos))
 
     return(Neighbours)    
@@ -40,7 +37,7 @@ def getH(Node, goal):
     return (sum)
 
 def path(nodo):
-    camino = [] #nodo.parent
+    camino = [] 
     while (nodo.parent != None): 
        camino.append(nodo)
        nodo = nodo.parent
@@ -69,8 +66,6 @@ def A_star(start, goal, mapa):            #Algoritmo general
     #Agrego el nodo inicial y sus vecinos OPEN
     OPEN.append(start)
 
-    #OPEN.append(vecinos)
-
     while (len(OPEN) != 0):
         node_current = OPEN[0]
 
@@ -92,10 +87,9 @@ def A_star(start, goal, mapa):            #Algoritmo general
         #Generación de vecinos
         vecinos = generate_neighbours(node_current, mapa)
 
-#        for i in range (0, (len(vecinos)-1)):
         for neig in vecinos:
             successor_cost = node_current.g + getH(node_current, neig)
-        #    neig.parent = node_current
+
             if neig in OPEN:
                 if (neig.g < successor_cost):
                     CLOSED.append(neig)
@@ -108,9 +102,9 @@ def A_star(start, goal, mapa):            #Algoritmo general
                 neig.h =getH(neig, goal)
                 OPEN.append(neig)
             neig.g = successor_cost
-            #neig.h = getH
             neig.parent = node_current
             neig.f = neig.g + neig.h
+
         #Agrego el nodo actual a la lista cerrada
         CLOSED.append(node_current)
         OPEN.remove(node_current)
@@ -124,12 +118,11 @@ def A_star(start, goal, mapa):            #Algoritmo general
 
 if __name__ == "__main__":
     mapa=mapa()
-    #print(mapa)
     goal = Node([0, 0])
     start = Node([15, 8])
     
     a = A_star(start, goal, mapa)
-    print("camino")
+    print("Camino: ", " ")
     print(a)
 
 

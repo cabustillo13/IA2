@@ -5,17 +5,7 @@ import matplotlib as map
 import random as rn
 from mapa import mapa
 import tp1_ej3 as star
-#import change_position
-'''
-def coordenadas(mapa, val):
-    mapa = mapa
-    auxiliar = []
-    for i in range (0, len(mapa)):              #filas  
-        for j in range(len(mapa[0])):           #columnas
-            if mapa[i][j] in val:
-                auxiliar.append(mapa[i][j])
-    return (auxiliar)            
-'''
+import time
 
 #Cambia posición de un item en la lista y obtiene distancia total recorrida
 def swap_positions(val,mapa):
@@ -27,17 +17,11 @@ def distancia(val, mapa):
     E_sum = 0    
     for a in range (0,(len(val)-1)):
         E = star.A_star(star.Node(val[a]),star.Node(val[a+1]),mapa)
-        print(E)
         E_sum += len(E)
     return E_sum
         
-
+'''
 def posiciones(valores,mapa):
-    '''
-    for i in range(0, (len(valores))):
-        if i in mapa:
-            posiciones.append(i)
-    '''
     posiciones = []
     auxiliar = []
     for i in range(0, len(mapa)):
@@ -45,7 +29,7 @@ def posiciones(valores,mapa):
             if mapa[i][j] in valores:  
                 auxiliar.append(valores.index(mapa[i][j])) #Agrego la posicion del vector
                 #puedo hacer tupla con posicion y valor
-                
+'''                
                 
 #Función Algoritmo general 
 def simulated_annealing(val,mapa):
@@ -92,7 +76,7 @@ if __name__ == "__main__":
     #Luego de tomar valores, se puede transformar en una lista de posiciones
     val = [[0,0],[5,3],[3,6],[9,0],[6,7]]
     a = simulated_annealing(val, mapa)
-
+    time.process_time()
     #Tener en cuenta para pasar de número a posicion ya no va a funcionar el análisis anterior
     #Hay que buscar una posición que sea 0 y adyacente al valor ingresado
 
