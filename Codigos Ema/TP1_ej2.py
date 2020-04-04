@@ -79,9 +79,10 @@ def a_star(map,start,end,obstacles,tam):
                     OPEN.append(neighbour)
             
 def main():
-    print("Ejercicio3_Robot_6GDL")
+    print("Ejercicio2_Robot_6GDL")
     rd.seed(None)
     tam = 22 #es la cantidad de puntos articulares por cada GDL
+    #Se recomienda un numero menor a 25 para que la ejecucion del codigo sea hasta 30~ seg
     map = generate_map(tam) 
     obstacles = generate_obstacles(map,tam)
     #Funcionamiento de randint(a,b): a<=N<=b (nro aleatorio entre a y b, incluidos estos dos)
