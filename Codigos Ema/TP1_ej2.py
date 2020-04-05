@@ -12,7 +12,7 @@ class Nodo:
     def calculate_h(self,end): #Heuristica entre nodo actual y final
         self.h = abs(self.pos[0]-end[0])+abs(self.pos[1]-end[1])+abs(self.pos[2]-end[2])+abs(self.pos[3]-end[3])+abs(self.pos[4]-end[4])+abs(self.pos[5]-end[5])
     def calculate_g(self): #Camino recorrido
-        self.g = self.g + 1
+        self.g += 1 
     def calculate_f(self): 
         self.f = self.g+self.h
 
@@ -70,7 +70,7 @@ def a_star(map,start,end,obstacles,tam):
         for neighbour in neighbours:
             if neighbour in CLOSED:
                 continue 
-            Nodo.calculate_g(current)
+            Nodo.calculate_g(neighbour)
             Nodo.calculate_h(neighbour,end) 
             Nodo.calculate_f(neighbour)
             if neighbour.g < current.g or neighbour not in OPEN:
@@ -81,7 +81,7 @@ def a_star(map,start,end,obstacles,tam):
 def main():
     print("Ejercicio2_Robot_6GDL")
     rd.seed(None)
-    tam = 22 #es la cantidad de puntos articulares por cada GDL
+    tam = 15 #cantidad de puntos articulares por cada GDL
     #Se recomienda un numero menor a 25 para que la ejecucion del codigo sea hasta 30~ seg
     map = generate_map(tam) 
     obstacles = generate_obstacles(map,tam)
