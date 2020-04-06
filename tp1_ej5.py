@@ -3,7 +3,7 @@ import numpy as np
 import math
 import matplotlib as map
 import random as rn
-from mapa import mapa
+from mapa import generate_map
 
 from tp1_ej3 import A_star, Node
 
@@ -62,7 +62,7 @@ def simulated_annealing(val,mapa):
     print("Solución última: ", X)
     print("Energía: ", E)
     #posicion_mejor = Best_path[0] 
-    print("Mejor camino: ", min_X)
+    print("Mejor orden: ", min_X)
     #energia_mejor = Best_path[1]
     print("Menor energía: ", min_E)   
    
@@ -70,10 +70,10 @@ def simulated_annealing(val,mapa):
 if __name__ == "__main__":
 
     #valores= input("Valores a ingresar(como lista): ")          
-    mapa = mapa()
+    mapa = generate_map()
     #Luego de tomar valores, se puede transformar en una lista de posiciones
     
-    val = [(0,0),(5,6),(6,3),(9,0),(8,0),(14,9),(9,6),(3,9),(12,6),(0,0)]
+    val = [(0,0),(5,6),(6,3),(9,0),(8,0),(14,3),(9,7),(3,7),(12,7),(0,0)]
 
     a = simulated_annealing(val, mapa)
     

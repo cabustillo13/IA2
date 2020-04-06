@@ -2,7 +2,7 @@
 import numpy as np
 import math
 import matplotlib as map
-from mapa import mapa
+from mapa import generate_map
 from time import time
 
 class Node:
@@ -114,7 +114,7 @@ def A_star(start, goal, mapa):            #Algoritmo general
 
 
 if __name__ == "__main__":
-    mapa=mapa()
+    mapa=generate_map()
     goal = Node((6, 3))
     start = Node((10, 0))
     init = time()

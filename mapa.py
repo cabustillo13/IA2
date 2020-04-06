@@ -1,36 +1,34 @@
 import numpy as np
 import math
 
-def mapa(): 
+def generate_map(n_rows_shelves=3,n_columns_shelves=2): #Polimorfismo por repeticion: Se pueden pasar parametros y que adopte estos pero por defecto es como en el TP
+    n_rows = 5*n_rows_shelves+1
+    n_columns = 4*n_columns_shelves
     x=1
-    fila=1
-    columna=1
-    cant_filas_estantes = 3
-    cant_columnas_estantes = 3
-    pasillo = 3 #nro de columna q esta el 1er pasillo
-    m = 1
-    n_filas = 5*cant_filas_estantes+1
-    n_columnas = 3*cant_columnas_estantes+1
-    map = np.zeros((n_filas,n_columnas))
-    while(x<=8*cant_columnas_estantes*cant_filas_estantes):
-        map[fila][columna] = x
+    row=1
+    column=1
+    pasillo = 3 #nro de columna que esta el 1er pasillo
+    m = 1       #multiplicador para recorrer cada columna de estantes
+    map = np.zeros((n_rows,n_columns),int) #crea matriz de n*m de enteros
+    while(x<=8*n_columns_shelves*n_rows_shelves):
+        map[row][column] = x
         if x%2==0: #x es par
-            fila += 1
-            columna -= 1
+            row += 1
+            column -= 1
         else:
-            columna += 1
+            column += 1
         if x%8==0:
-            fila+=1
+            row+=1
         x +=1
-        if x==(8*cant_filas_estantes*m)+1:
-            fila = 1
-            columna = pasillo+1
-            pasillo += 3 
-            m += 1 #par(a recorrer cada columna de estantes
-    print(map)
-    return (map)
+        if x==(8*n_rows_shelves*m)+1:
+            row = 1
+            column = pasillo+2
+            pasillo += 4 
+            m += 1 
+    print(np.matrix(map))
+    return(map)
 
 if __name__ == "__main__":
-    y = mapa()
+    y = generate_map()
     print (y)
     print(len(y))
