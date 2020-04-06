@@ -3,6 +3,7 @@ import numpy as np
 import math
 import matplotlib as map
 from mapa import mapa
+from time import time
 
 class Node:
 #inicio desde un punto x,y,z y especifico el objetivo
@@ -10,7 +11,7 @@ class Node:
         self.g = 0
         self.h = getH
         self.f = 0
-        self.position = position[:]     
+        self.position = position        #[:]     
         self.parent = None              #Puntero al padre
         self.successor_current_cost = 0
   
@@ -19,12 +20,11 @@ def generate_neighbours(node_current,mapa):
     Neighbours = []
 
     for a in [(-1,0), (1,0), (0,-1), (0,1)]:
-        if (0 <= x[0]+a[0] < (len(mapa))) and (0 <= x[1]+a[1] < (len(mapa[0]))) and mapa[x[0]+a[0], x[1]+a[1]]==0:
-            
-            neighbours_pos = [x[0]+a[0], x[1]+a[1]]
+        if (0 <= x[0]+a[0] < (len(mapa))) and (0 <= x[1]+a[1] < (len(mapa[0]))) and (mapa[x[0]+a[0], x[1]+a[1]]==0):    
+            neighbours_pos = (x[0]+a[0], x[1]+a[1])
+            #Neighbours = [x for x,y in Neighbours.position(data=True) if not (y.position==(neighbours_pos))
             Neighbours.append(Node(neighbours_pos))
-
-    return(Neighbours)    
+    return (Neighbours)   
 
 def getH(Node, goal):
     sum = 0
@@ -39,17 +39,13 @@ def getH(Node, goal):
 def path(nodo):
     camino = [] 
     while (nodo.parent != None): 
-       camino.append(nodo)
+       camino.append(nodo.position)
        nodo = nodo.parent
-    camino2 = []
-    for i in camino:
-        camino2.append(i.position)
-    return (camino2)
-      
+    return(camino)
+ 
 
 def A_star(start, goal, mapa):            #Algoritmo general
     start = start   
-    
     start.g = 0
     start.h = getH(start, goal)                          
     start.f = start.h
@@ -59,12 +55,11 @@ def A_star(start, goal, mapa):            #Algoritmo general
     goal = goal             
     goal.h = 0
 
-    #Listas Abierta y Cerrada
-    OPEN = []
+    #Listas Abierta y Cerrada, Agrego el nodo inicial a OPEN
+    OPEN = [start]
     CLOSED = []
 
-    #Agrego el nodo inicial y sus vecinos OPEN
-    OPEN.append(start)
+    #Lista de vecinos
 
     while (len(OPEN) != 0):
         node_current = OPEN[0]
@@ -75,7 +70,7 @@ def A_star(start, goal, mapa):            #Algoritmo general
                 node_current = vec
 
         if (node_current.position == goal.position):
-            print("Solución encontrada")
+        #    print("Solución encontrada")
             CLOSED.append(node_current)
 
             #Guardar la direccion de cada hijo
@@ -111,6 +106,8 @@ def A_star(start, goal, mapa):            #Algoritmo general
     if (node_current.position != goal.position):
         print("No se encontró solución. Posición final: ")
         print(node_current.position)
+    #print(v)
+    #Camino=len(v)
     return v
                              
 
@@ -118,13 +115,15 @@ def A_star(start, goal, mapa):            #Algoritmo general
 
 if __name__ == "__main__":
     mapa=mapa()
-    goal = Node([0, 0])
-    start = Node([15, 8])
-    
+    goal = Node((6, 3))
+    start = Node((10, 0))
+    init = time()
     a = A_star(start, goal, mapa)
+    finish=time()
     print("Camino: ", " ")
     print(a)
-
+    print("Duración del Algoritmo A*: ",(finish-init))
 
     
-    
+    #CAMBIOS: LINEA 19 SACO LIST nEIGHBOURS, la pongo en el main, genero una vez y luego evalúo
+    #cambio en la linea 26, el append lo hago en el for
