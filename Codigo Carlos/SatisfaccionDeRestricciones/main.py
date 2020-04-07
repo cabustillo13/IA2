@@ -5,6 +5,11 @@ def main():
     k=10 #Cantidad de tareas
     tareas=np.zeros(k,int)
     
+    #Esto lo hacemos para que en la evaluacionRecursion salte el principio de analisis de condiciones y de pier para empezar a avanzar en el tiempo
+    #si lo dejaramos como una lista de ceros no se empezaria a mover y directamente marcaria que no se puede determinar una solucion
+    for i in range(0,k):
+        tareas[i]=-1
+        
     #En python, todas las variables son punteros a objetos, que son manejados implicitamente
     #Lo que si hacemos es considerar el dato mutable
     pos_inicial=0

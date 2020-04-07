@@ -5,7 +5,7 @@ def recursion (posicion, tareas):
     
     #tareas = tareas[:] #Se crea una copia de la lista dentro de la misma funcion para no alterar los valores iniciales de tareas
     d=[30,10,15,5,20,20,60,25,5,10] #d= Lista de duracion de cada tarea
-    deadline = 110 
+    deadline = 500 
     aceptado = False
     tareas[posicion]=0 
 
