@@ -24,17 +24,19 @@ import random as rd
 import numpy as np
 from time import time
 
+
 class Individuo():
-    def __init__(self,genes=0,fitness=0):
+    def __init__(self,genes=[],fitness=0,seleccionado=False):
         self.genes = genes
         self.fitness = fitness
+        self.seleccionado = seleccionado
 
 def create_picking_list():
     picking_list = []
     all_PL = [] #lista de 5 listas picking
     print("Ordenes ficticias: ")
-    for i in range(5): #5 listas de productos entre 4 y 7 productos c/u 
-        for j in range(rd.randint(4,7)): #lista de picking variable entre 5 y 10
+    for i in range(1): #5 listas de productos entre 4 y 7 productos c/u 
+        for j in range(rd.randint(4,7)): #lista de picking variable entre 4 y 7
             value = rd.randint(1,48) #valor a buscar aleatorio
             if value not in picking_list:
                 picking_list.append(value)
@@ -53,7 +55,7 @@ def generar_primer_poblacion(n_poblacion):
             while producto in obj_list:
                 producto = rd.randint(1,48)
             obj_list.append(producto)
-        poblacion.append(Individuo(obj_list)) #pasa de ser una lista a objeto Individuo que contiene esa lista
+        poblacion.append(Individuo(obj_list,0,0)) #pasa de ser una lista a objeto Individuo que contiene esa lista
     return poblacion
 
 def calcular_fitness(lista,individuo): #individuo ordena nuevamente el mapa en esa disposicion
@@ -63,8 +65,7 @@ def seleccion(poblacion,n_poblacion,all_PL): #selecciono los k mejores.
     for individuo in poblacion: #para cada indivuduo de la poblacion calcula el fitness como la suma de los temple de todas las listas
         f_total = 0 #por individuo
         for lista in all_PL:
-            fitness = calcular_fitness(lista,individuo.genes) 
-            f_total += fitness
+            f_total += calcular_fitness(lista,individuo.genes) 
         individuo.fitness = f_total
         #print(individuo.fitness)
     k = int(0.25*n_poblacion) #nro de seleccionados
@@ -75,10 +76,12 @@ def seleccion(poblacion,n_poblacion,all_PL): #selecciono los k mejores.
     while i!=k:
         f_min = poblacion[0].fitness #semilla del primer fitness
         for individuo in poblacion:
-            if individuo.fitness < f_min and individuo not in seleccionados:
+            if individuo.fitness <= f_min and individuo not in seleccionados:
                 f_min = individuo.fitness
                 seleccionados[i] = individuo
         i += 1
+    for i in seleccionados:
+        i.seleccionado = True #flag de q fue seleccionado
     return seleccionados
 
 def crossover(seleccionados): #cruce de orden
@@ -87,23 +90,20 @@ def crossover(seleccionados): #cruce de orden
         corte2 = rd.randint(1,46)
         listaA = seleccionados[i].genes #para tener un nombre +corto
         listaB = seleccionados[i+1].genes
-        while cruce2 == cruce1: #por si se llegara a repetir
-            cruce2 = rd.randint(1,46)
-        if cruce1 > cruce2: #para mantener que cruce 1 sea menor que cruce2
-            aux = cruce1
-            cruce1 = cruce2
-            cruce2 = aux
-        print("cruce1:",cruce1,"cruce2:",cruce2)
-        print("ListaA:\n",listaA,"ListaB:\n",listaB)
+        while corte1 == corte2: #por si se llegara a repetir
+            corte2 = rd.randint(1,46)
+        if corte1 > corte2: #para mantener que cruce 1 sea menor que cruce2
+            aux = corte1
+            corte1 = corte2
+            corte2 = aux
         newA = []
         newB = []
         for m in range(len(listaA)):
             newA.append(0)
             newB.append(0)
-        for i in range(corte1,corte2+1):
-            newA[i] = listaB[i]
-            newB[i] = listaA[i]
-
+        for j in range(corte1,corte2):
+            newA[j] = listaB[j]
+            newB[j] = listaA[j]
         it = corte2+1 #sirve para iterar ---LISTA A
         actual = it #donde se va a guardar
         while actual != corte1:
@@ -118,7 +118,7 @@ def crossover(seleccionados): #cruce de orden
             newA[actual] = num
             actual += 1
 
-        it = corte2+1 #sirve para iterar ---LISTA A
+        it = corte2+1 #sirve para iterar ---LISTA B
         actual = it #donde se va a guardar
         while actual != corte1:
             if actual == len(listaB):
@@ -131,9 +131,8 @@ def crossover(seleccionados): #cruce de orden
                 num = listaB[it]
             newB[actual] = num
             actual += 1
-        print("ListaA:\n",listaA,"ListaB:\n",listaB)
-        seleccionados[i].genes = listaA
-        seleccionados[i+1].genes = listaB
+        seleccionados[i].genes = newA
+        seleccionados[i+1].genes = newB
     return seleccionados
 
 def evolucion(seleccionados):
@@ -150,28 +149,42 @@ def evolucion(seleccionados):
             seleccionados[i].genes[gen2] = aux
     return seleccionados
 
+def buscar_el_mejor(poblacion):
+    fitness_min = poblacion[0].fitness
+    mejor = poblacion[0]
+    for individuo in poblacion:
+        if individuo.fitness < fitness_min:
+            fitness_min = individuo.fitness
+            mejor = individuo
+    return mejor
+
 def genetic_algoritm():
     all_PL = create_picking_list() #3)
-    n_poblacion = 8 #len(all_PL)) <-- <-- <-- <-- <-- <-- <-- <--
+    n_poblacion = 8 #len(all_PL)) <-- <-- <-- <-- <-- <--TAMAÑO DE POBLACION
     poblacion = generar_primer_poblacion(n_poblacion) 
     
     generacion = 0
-    max_generacion = 1
+    max_generacion = 5
 
-    while(generacion<max_generacion):
+    while(generacion<max_generacion): #criterio de parada: tiempo transcurrido
+        print("generacion",generacion+1)
         seleccionados = seleccion(poblacion,n_poblacion,all_PL)
         seleccionados = crossover(seleccionados)
-        seleccionados = evolucion(seleccionados)
+        seleccionados = evolucion(seleccionados)     
+        for i in poblacion:
+            i.seleccionado = False
         generacion += 1
+    print("El mejor individuo de la poblacion es:")
+    mejor=buscar_el_mejor(poblacion)
+    print(mejor.genes)
 
 def main():
     print("Ejercicio 6")
     rd.seed(None)
-    #loading_station = (0,0) #4)
     t1 = time()
     genetic_algoritm()
     t2 = time()
-    print("Tiempo de ejecucion:",round(t2-t1,2),"segundos")
+    print("Tiempo de ejecucion:",round((t2-t1)/60,2),"minutos")
 
 if __name__ == "__main__":
     main()

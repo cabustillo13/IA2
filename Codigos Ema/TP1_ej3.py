@@ -10,13 +10,13 @@ class Nodo:
         self.h = 0
         self.f = 0
     def calculate_h(self,end): #Heuristica entre nodo actual y final
-        self.h = (self.pos[0]-end[0])**2+(self.pos[1]-end[1])**2
+        self.h = (self.pos[0]-end.pos[0])**2+(self.pos[1]-end.pos[1])**2
     def calculate_g(self,current): #camino recorrido
         self.g = current.g + 1
     def calculate_f(self): 
         self.f = self.g+self.h
 
-def generate_map(n_rows_shelves=3,n_columns_shelves=2): #Polimorfismo por repeticion: Se pueden pasar parametros y que adopte estos pero por defecto es como en el TP
+def generate_map(order=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,31,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48],n_rows_shelves=3,n_columns_shelves=2): #Se pueden pasar parametros y que adopte estos pero por defecto es como en el TP
     n_rows = 5*n_rows_shelves+1
     n_columns = 4*n_columns_shelves
     x=1
@@ -26,7 +26,7 @@ def generate_map(n_rows_shelves=3,n_columns_shelves=2): #Polimorfismo por repeti
     m = 1       #multiplicador para recorrer cada columna de estantes
     map = np.zeros((n_rows,n_columns),int) #crea matriz de n*m de enteros
     while(x<=8*n_columns_shelves*n_rows_shelves):
-        map[row][column] = x
+        map[row][column] = order[x-1]
         if x%2==0: #x es par
             row += 1
             column -= 1
@@ -40,7 +40,6 @@ def generate_map(n_rows_shelves=3,n_columns_shelves=2): #Polimorfismo por repeti
             column = pasillo+2
             pasillo += 4 
             m += 1 
-    print(np.matrix(map))
     return(map)
 
 def search_position_of(value,map):
@@ -57,14 +56,13 @@ def search_position_of(value,map):
 def a_star(map,start,end):
     OPEN = []
     CLOSED = []
-    start_node = Nodo(None,start)
 
-    Nodo.calculate_h(start_node,end)
-    Nodo.calculate_f(start_node)
-    current = start_node
+    Nodo.calculate_h(start,end)
+    Nodo.calculate_f(start)
+    current = start
     OPEN.append(current)
 
-    while current.pos != end:
+    while current.pos != end.pos:
         current = OPEN[0]
         current_index = 0
         
@@ -75,7 +73,7 @@ def a_star(map,start,end):
         OPEN.pop(current_index) 
         CLOSED.append(current)  
 
-        if current.pos == end:
+        if current.pos == end.pos:
             path = []
             while current is not None:
                 path.append(current.pos)
@@ -87,11 +85,11 @@ def a_star(map,start,end):
             pos = (a[0] + current.pos[0],a[1] + current.pos[1])
             if (0 <= current.pos[0]+a[0] < len(map)) and (0 <= current.pos[1]+a[1] < len(map[0])) and map[pos]==0:
                 neighbours.append(Nodo(current,pos))
-
+        
         for neighbour in neighbours:
             if neighbour in CLOSED:
                 continue 
-            Nodo.calculate_g(neighbour, current)
+            Nodo.calculate_g(neighbour,current)
             Nodo.calculate_h(neighbour,end) 
             Nodo.calculate_f(neighbour)
             if neighbour.g < current.g or neighbour not in OPEN: 
@@ -101,22 +99,21 @@ def a_star(map,start,end):
             
 def main():
     print("Ejercicio 3")
-    t_prom = 0 #para calcular el promedio de 20 A*
-
-    map = generate_map() #pueden pasarse 2 parametros, fila y columnas de estaterias
-    start = search_position_of(1,map) 
-    end = search_position_of(35,map)  
-    for i in range(20):
+    t_prom = 0 #para calcular el promedio de 5 A*
+    n=5
+    map = generate_map() #pueden pasarse 3 parametros, orden del almacen,fila y columnas de estaterias
+    start = Nodo(None,search_position_of(1,map))
+    end = Nodo(None,search_position_of(43,map))
+    for i in range(n):
         t1 = time.time()
         solution = a_star(map,start,end)
         t2 = time.time()
         t_prom += t2-t1 
-    #"Pintar" solucion con unos
-    print("\nCamino:")
+    print("Camino:")
     for pos in solution:
-        map[pos] = 1
+        map[pos] = 1 #"Pintar" solucion con unos
         print(pos)
-    print("\n",np.matrix(map),"\n\nTiempo de ejecucion promedio A*: ",str(round(t_prom/20,8)))
+    print(np.matrix(map),"\n\nTiempo de ejecucion promedio A*: ",str(round(t_prom/n,8)))
     
 if __name__ == "__main__":
     main()
