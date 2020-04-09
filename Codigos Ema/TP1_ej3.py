@@ -16,7 +16,7 @@ class Nodo:
     def calculate_f(self): 
         self.f = self.g+self.h
 
-def generate_map(order=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,31,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48],n_rows_shelves=3,n_columns_shelves=2): #Se pueden pasar parametros y que adopte estos pero por defecto es como en el TP
+def generate_map(order=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48],n_rows_shelves=3,n_columns_shelves=2): #Se pueden pasar parametros y que adopte estos pero por defecto es como en el TP
     n_rows = 5*n_rows_shelves+1
     n_columns = 4*n_columns_shelves
     x=1
@@ -54,11 +54,13 @@ def search_position_of(value,map):
             elif map[index][column+1] == 0:
                 column += 1
             return (index,column)
+    return (0,0) #Para evitar errores, por si no encuentra el valor buscado
 
-def a_star(map,start,end):
+def a_star(map,a,b): #a y b son enteros
     OPEN = []
     CLOSED = []
-
+    start = Nodo(None,search_position_of(a,map))
+    end = Nodo(None,search_position_of(b,map))
     Nodo.calculate_h(start,end)
     Nodo.calculate_f(start)
     current = start
@@ -102,20 +104,20 @@ def a_star(map,start,end):
 def main():
     print("Ejercicio 3")
     t_prom = 0 #para calcular el promedio de 5 A*
-    n=5
     map = generate_map() #pueden pasarse 3 parametros, orden del almacen,fila y columnas de estaterias
-    start = Nodo(None,search_position_of(1,map))
-    end = Nodo(None,search_position_of(43,map))
-    for i in range(n):
+    a=1
+    b=37 #productos del almacen de inicio y fin respectivamente
+    
+    for i in range(5):
         t1 = time.time()
-        solution = a_star(map,start,end)
+        solution = a_star(map,a,b)
         t2 = time.time()
         t_prom += t2-t1 
     print("Camino:")
     for pos in solution:
         map[pos] = 1 #"Pintar" solucion con unos
         print(pos)
-    print(np.matrix(map),"\n\nTiempo de ejecucion promedio A*: ",str(round(t_prom/n,8)))
+    print(np.matrix(map),"\n\nTiempo de ejecucion promedio A*: ",str(round(t_prom/5,6)))
     
 if __name__ == "__main__":
     main()
