@@ -1,103 +1,88 @@
-from random import randint
-import math
+from TP1_ej3 import generate_map,search_position_of,Nodo,a_star
 import numpy as np
-import TP1_ej3 as A_estrella
 from time import time
+import random as rd
+import math
 
-def distancia_solucion(a,b,map):
-    if (a < b):
-        #map = A_estrella.generate_map() #pueden pasarse 2 parametros, fila y columnas de estaterias
-        start = A_estrella.Nodo(None,A_estrella.search_position_of(a,map)) #nodos en vez de tuplas
-        end = A_estrella.Nodo(None,A_estrella.search_position_of(b,map))
-        solution = A_estrella.a_star(map,start,end)    
-        if (a != b):
-            return (len(solution))
-        else:
-            return 0
-    else:
-        return 0
+def fitness(P_list,map): #calcula el fitness de cierto orden de una lista
+    aux = P_list[:]
+    f_total = 0
+    aux.insert(0,0)
+    aux.insert(len(aux)-1,0)
+    for i in range(len(aux)):
+        aux[i] = Nodo(None,search_position_of(aux[i],map))
+    for j in range(len(aux)-1):
+        f_total += len(a_star(map,aux[j],aux[j+1]))
+    return f_total
 
-def simulated_annealing(picking_list,order,want_to_print): 
-    #tener como parametro una lista y el mapa
-    map = A_estrella.generate_map(order) #pueden pasarse 2 parametros, fila y columnas de estaterias
-    
-    #k-2 representa la cantidad de paradas que se va a hacer en el picking
-    k=len(picking_list)+2
-    ubi= np.zeros(k,int)
-    ubi_min = np.zeros(k,int)
-    ubi2 = np.zeros(k,int)
-    
-    for i in range(1,k-1):
-        ubi[i] = picking_list[i-1]
-    
-    distancia,distancia2,distancia_min = 0,0,0 #Forma de asignar valores para evitar el "cant assign to literal" en una sola linea de codigo
-            
-    for i in range(0,k):
-        ubi_min[i]=ubi[i]
-    for i in range(1,k):
-        #Aca se va sumando el costo del recorrido / es una especie de valor semilla
-        distancia_min = distancia_min + distancia_solucion(ubi_min[i],ubi_min[i-1],map)
-    
-    it=0
-    ITMAX = 1500 #Cantidad de iteraciones maximas
-    
-    while (it != ITMAX):
-        it+=1
-        distancia=0
-        distancia2=0
-        T = (ITMAX)/it #Es arbitrario, se puede poner alguna otra funcion para definir T
-        
-        for i in range(0,k):
-            ubi2[i]=ubi[i]
-            
-        for i in range(1,k):
-            distancia = distancia + distancia_solucion(ubi[i],ubi[i-1],map)
-        
-        #Obtencion de un vecino
-        swap1= randint(1, k-2)
-        swap2= randint(1, k-2)
-        
-        while (swap1==swap2):
-            swap2= randint(1, k-2)
-            
-        aux2 = ubi2[swap1] #Lo guardo para no perder el dato
-        ubi2[swap1] = ubi2[swap2]
-        ubi2[swap2] = aux2
-        
-        #Calculo de la calidad del vecino - Temple simulado
-        for i in range(1,k):
-            distancia2 = distancia2 + distancia_solucion(ubi2[i], ubi2[i-1],map)
-            
-        if (distancia2 < distancia):
-            for i in range (0,k):
-                ubi[i] = ubi2[i] 
-        else: #Cuando distancia2 > distancia, la probabilidad que lo acepte segun el temple simulado esta dado de esta manera
-            if((randint(0,100)/100) < math.exp(distancia - distancia2)/T):
-                for i in range (0,k):
-                    ubi[i] = ubi2[i] 
-                
-        if (distancia2 < distancia_min):
-            for i in range(0,k):
-                ubi_min[i]= ubi2[i]
-                distancia_min= distancia2
+def swap_positions(current):
+    swap1 = rd.choice(current)
+    swap2 = rd.choice(current)
+    while swap1 == swap2:
+        swap2 = rd.choice(current) #por si coinciden
+    next=current[:]
+    a, b = next.index(swap1), next.index(swap2)
+    next[b], next[a] = next[a], next[b]
+    return next
+
+def plot_solution(time_list,prob_list):
+    import matplotlib
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots()
+    ax.plot(time_list, prob_list)
+    ax.set(xlabel='Tiempo', ylabel='Probabilidad')
+    ax.grid()
+    plt.show()      
+
+def simulated_annealing(picking_list,order,want_to_print):
+    map=generate_map(order)
+    time=1
+    max_time = T = 1000 #coincide con la T inicial
+    prob_list = [] #para plotear
+    time_list = [] #para plotear
+    current = picking_list[:]
     if want_to_print:
-        print("Disposicion de posiciones de la solucion:")
-        for i in range(len(picking_list)+2):
-            print(ubi_min[i])
-        print("Distancia minima lograda con esa disposicion:", distancia_min)
-    
-    return distancia_min
-    
+        print("Distancia inicial:",fitness(picking_list,map),"con lista:",picking_list)
+    #-----------------Inicializando variables-------------
+    while True:
+        T -= 1 #math.exp(1/time) #max_time-0.9*time #decrecimiento lineal
+        if T<math.exp(-10) or time > max_time:
+            dist_min = fitness(current,map)
+            if want_to_print:
+                #plot_solution(time_list,prob_list)
+                print("Distancia minima:",dist_min,"con lista:",current)
+            return dist_min
+        
+        next = swap_positions(current) #vecino random 
+        
+        f_next = fitness(next,map)
+        f_current = fitness(current,map)
+        delta_E = f_next - f_current 
+
+        value = rd.random() #nro aleatorio entre 0 and 1
+        prob = math.exp(-delta_E/(0.02*T)) #0.10 para abajo es conveniente
+        if delta_E <= 0:
+            current = next
+        elif value < prob:
+            current = next
+            prob_list.append(prob)
+            time_list.append(time)
+            #print(f_next,f_current,round(prob,2),round(value,2),delta_E,round(T,1))
+        
+        time+=1
+
 def main():
-    print("Ejercicio 5")
+    print("Ejercicio 5:") 
+    rd.seed(None)
+    picking_list = [45, 1, 6, 8, 24, 39, 17, 18,2]
     order = []
-    for i in range(48):
-        order.append(i+1)
-    lista_picking = [16,48,25,1,2,37,16,17,21,24]
-    t1 = time()
-    simulated_annealing(lista_picking,order,True)
-    t2 = time()
-    print("Tiempo de ejecucion:",round(t2-t1,2),"segundos")
+    for k in range(1,49):
+        order.append(k)
     
+    t1=time()
+    simulated_annealing(picking_list,order,True)
+    t2=time()
+    print("Tiempo de ejecucion:",round(t2-t1,4),"segundos")
+
 if __name__ == "__main__":
     main()

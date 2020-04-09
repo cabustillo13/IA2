@@ -19,11 +19,10 @@
 #Genes: disposicion de productos (48)
 #Fitness: distancia de recocido simulado
 
-from Recocido_Simulado import simulated_annealing, search_position_of, generate_map
+from TP1_ej5 import simulated_annealing
 import random as rd
 import numpy as np
 from time import time
-
 
 class Individuo():
     def __init__(self,genes=[],fitness=0,seleccionado=False):
@@ -55,11 +54,14 @@ def generar_primer_poblacion(n_poblacion):
             while producto in obj_list:
                 producto = rd.randint(1,48)
             obj_list.append(producto)
-        poblacion.append(Individuo(obj_list,0,0)) #pasa de ser una lista a objeto Individuo que contiene esa lista
+        poblacion.append(Individuo(obj_list,0,False)) #pasa de ser una lista a objeto Individuo que contiene esa lista
     return poblacion
 
 def calcular_fitness(lista,individuo): #individuo ordena nuevamente el mapa en esa disposicion
-    return simulated_annealing(lista,individuo)
+    print(lista)
+    print(individuo,"\n---")
+    
+    return simulated_annealing(lista,individuo,False)
 
 def seleccion(poblacion,n_poblacion,all_PL): #selecciono los k mejores.
     for individuo in poblacion: #para cada indivuduo de la poblacion calcula el fitness como la suma de los temple de todas las listas
@@ -74,17 +76,17 @@ def seleccion(poblacion,n_poblacion,all_PL): #selecciono los k mejores.
     for m in range(k):
         seleccionados.append(Individuo())
     while i!=k:
-        f_min = poblacion[0].fitness #semilla del primer fitness
+        f_min = poblacion[0].fitness #valor semilla
         for individuo in poblacion:
             if individuo.fitness <= f_min and individuo not in seleccionados:
                 f_min = individuo.fitness
                 seleccionados[i] = individuo
         i += 1
-    for i in seleccionados:
-        i.seleccionado = True #flag de q fue seleccionado
+    for ind in seleccionados:
+        ind.seleccionado = True #flag de q fue seleccionado
     return seleccionados
 
-def crossover(seleccionados): #cruce de orden
+def crossover(seleccionados): #Crossover por cruce de orden
     for i in range(0,len(seleccionados),2): #los seleccionados pares
         corte1 = rd.randint(1,46) #el 1 y 46 aseguran q haya al menos un nro a cada lado
         corte2 = rd.randint(1,46)
@@ -102,6 +104,7 @@ def crossover(seleccionados): #cruce de orden
             newA.append(0)
             newB.append(0)
         for j in range(corte1,corte2):
+            print(j)
             newA[j] = listaB[j]
             newB[j] = listaA[j]
         it = corte2+1 #sirve para iterar ---LISTA A
@@ -135,7 +138,7 @@ def crossover(seleccionados): #cruce de orden
         seleccionados[i+1].genes = newB
     return seleccionados
 
-def evolucion(seleccionados):
+def mutacion(seleccionados):
     for i in range(len(seleccionados)):
         probab_de_mutar = rd.random()
         if probab_de_mutar < 0.1:
@@ -167,10 +170,13 @@ def genetic_algoritm():
     max_generacion = 5
 
     while(generacion<max_generacion): #criterio de parada: tiempo transcurrido
-        print("generacion",generacion+1)
+        
+        print("----\nGeneracion",generacion+1,"\nSeleccion")
         seleccionados = seleccion(poblacion,n_poblacion,all_PL)
+        print("Cross-over")
         seleccionados = crossover(seleccionados)
-        seleccionados = evolucion(seleccionados)     
+        print("Mutacion")
+        seleccionados = mutacion(seleccionados)     
         for i in poblacion:
             i.seleccionado = False
         generacion += 1

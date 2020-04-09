@@ -43,6 +43,8 @@ def generate_map(order=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22
     return(map)
 
 def search_position_of(value,map):
+    if value == 0:
+        return (0,0)
     for index,row in enumerate(map):
         if value in row: #row es la fila entera. index es el numero de la fila donde esta el valor buscado         
             fila = np.ndarray.tolist(row) #row es del tipo numpy.ndarray y no tiene atributo index. con esta linea arreglo eso. Es un cambio de tipo de variable
