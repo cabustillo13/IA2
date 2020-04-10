@@ -1,11 +1,9 @@
 import switcher
 
 #Aca aplicamos la recursion    
-def recursion (posicion, tareas):
+def recursion (posicion, tareas,d,deadline):
     
     #tareas = tareas[:] #Se crea una copia de la lista dentro de la misma funcion para no alterar los valores iniciales de tareas
-    d=[30,10,15,5,20,20,60,25,5,10] #d= Lista de duracion de cada tarea
-    deadline = 500 
     aceptado = False
     tareas[posicion]=0 
 
@@ -42,20 +40,20 @@ def recursion (posicion, tareas):
         #Si el nodo evaluado no es el ultimo, debe avanzar al proximo nodo y esperar la validacion
         elif(cond == True and posicion<9):
             posicion=posicion + 1
-            aceptado = recursion(posicion, tareas)
+            aceptado = recursion(posicion, tareas,d,deadline)
             
             #Si el nodo es aceptado aca debe terminar el algoritmo
             if (aceptado): #if aceptado == True
                 return True
                 break
-            #si el nodo no es aceptado es no valido y se evalua las siguientes condiciones
+            #si el nodo no es aceptado -> es no valido y se evalua las siguientes condiciones
             else:
                 cond = False
-        #Si el nodo no es valido y no ha alcanzado el deadline, se prueba un siguiente valor de tiempo
+        #Si el nodo no es valido y no ha alcanzado el deadline -> se prueba un siguiente valor de tiempo
         #En este caso evaluamos en intervalo de 5 minutos
         if (cond == False and (tareas[posicion] + d[posicion]) < deadline):
             tareas[posicion] = tareas[posicion] + 5
-        #Si el nodo no es valido y ya alcanzamos el deadline (ya recorrimos todo el dominio) retorna false y hace el backtraking
+        #Si el nodo no es valido y ya alcanzamos el deadline (ya recorrimos todo el dominio) -> retorna false y hace el backtraking
         if (cond == False and (tareas[posicion] + d[posicion]) >= deadline):
             return False
             break
