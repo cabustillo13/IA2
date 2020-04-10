@@ -8,9 +8,7 @@ def fitness(P_list,map): #calcula el fitness de cierto orden de una lista
     aux = P_list[:]
     f_total = 0
     aux.insert(0,0) #posicion inicial y final son (0,0), es lo que devuelve search_position_of al pasarle un 0
-    aux.insert(len(aux)-1,0)
-    for i in range(len(aux)):
-        aux[i] = Nodo(None,search_position_of(aux[i],map))
+    aux.insert(len(aux),0)
     for j in range(len(aux)-1):
         f_total += len(a_star(map,aux[j],aux[j+1]))
     return f_total
@@ -72,13 +70,8 @@ def simulated_annealing(picking_list,order,want_to_print):
 def main():
     print("Ejercicio 5:") 
     rd.seed(None)
-    #picking_list = [37, 47, 11, 48, 24]
-    #order = [12, 3, 20, 36, 32, 37, 1, 2, 4, 23, 39, 9, 19, 40, 46, 29, 27, 35, 45, 13, 16, 14, 24, 11, 0, 6, 7, 25, 5, 47, 15, 41, 43, 22, 8, 34, 26, 42, 38, 21, 33, 31, 30, 28, 17, 18, 10, 44] 
-    picking_list = [45, 1, 6, 8, 24, 39, 17, 18,2]
-    order = []
-    for k in range(1,49):
-        order.append(k)
-    
+    picking_list = [37, 47, 11, 48, 24]
+    order = [12, 3, 20, 36, 32, 37, 1, 2, 4, 23, 39, 9, 19, 40, 46, 29, 27, 35, 45, 13, 16, 14, 24, 11, 48, 6, 7, 25, 5, 47, 15, 41, 43, 22, 8, 34, 26, 42, 38, 21, 33, 31, 30, 28, 17, 18, 10, 44]   
     t1=time()
     simulated_annealing(picking_list,order,True)
     t2=time()

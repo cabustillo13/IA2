@@ -3,7 +3,7 @@ import time
 import math
 
 class Nodo:
-    def __init__(self,padre=None,pos=None):
+    def __init__(self,padre=None,pos=(0,0)):
         self.padre = padre
         self.pos = pos
         self.g = 0

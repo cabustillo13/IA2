@@ -25,90 +25,81 @@ import numpy as np
 from time import time
 
 class Individuo():
-    def __init__(self,genes=[],fitness=0,seleccionado=False):
+    def __init__(self,genes=[],fitness=0):
         self.genes = genes
         self.fitness = fitness
-        self.seleccionado = seleccionado
 
 def create_picking_list():
     picking_list = []
-    all_PL = [] #lista de 5 listas picking
+    all_PL = []                          
     print("Ordenes ficticias: ")
-    for i in range(1): #5 listas de productos entre 4 y 7 productos c/u 
-        for j in range(rd.randint(4,7)): #lista de picking variable entre 4 y 7
-            value = rd.randint(1,48) #valor a buscar aleatorio
+    for i in range(5):                   #lista de 5 listas de picking 
+        for j in range(rd.randint(4,8)): #lista de picking variable entre 4 y 8
+            value = rd.randint(1,48)     #valor a buscar aleatorio
             if value not in picking_list:
                 picking_list.append(value)
         all_PL.append(picking_list)
         print(picking_list)
         picking_list = []
-    return all_PL #3
+    return all_PL 
 
 def generar_primer_poblacion(n_poblacion):
-    poblacion = [] #poblacion es una lista de objetos Invidividuo
-    #poblacion = np.zeros((n_poblacion,48),int)
+    poblacion = []                      #poblacion es una lista de objetos Invidividuo
     for i in range(n_poblacion):
-        obj_list = []
+        genes = []
         for j in range(48):
             producto = rd.randint(1,48) #incluye los extremos 1 y 48
-            while producto in obj_list:
+            while producto in genes:
                 producto = rd.randint(1,48)
-            obj_list.append(producto)
-        poblacion.append(Individuo(obj_list,0,False)) #pasa de ser una lista a objeto Individuo que contiene esa lista
+            genes.append(producto)
+        poblacion.append(Individuo(genes,0)) #pasa de ser una lista a objeto Individuo que contiene esa lista
     return poblacion
 
 def calcular_fitness(lista,individuo): #individuo ordena nuevamente el mapa en esa disposicion
-    print(lista)
-    print(individuo,"\n---")
-    
     return simulated_annealing(lista,individuo,False)
 
-def seleccion(poblacion,n_poblacion,all_PL): #selecciono los k mejores.
-    for individuo in poblacion: #para cada indivuduo de la poblacion calcula el fitness como la suma de los temple de todas las listas
-        f_total = 0 #por individuo
+def seleccion(poblacion,n_poblacion,all_PL): #selecciono los k mejores (20%)
+    for individuo in poblacion:              #para cada indivuduo de la poblacion calcula el fitness como la suma de los temple de todas las listas
+        f_total = 0                          #por individuo inicia en 0 y luego le sumamos lo acumulado
         for lista in all_PL:
             f_total += calcular_fitness(lista,individuo.genes) 
         individuo.fitness = f_total
-        #print(individuo.fitness)
-    k = int(0.25*n_poblacion) #nro de seleccionados
+    k = int(0.20*n_poblacion)                #nro de seleccionados
+    if k%2 == 1:                             #para que los seleccionados sean pares
+        k += 1
     seleccionados = []
     i = 0
     for m in range(k):
         seleccionados.append(Individuo())
     while i!=k:
-        f_min = poblacion[0].fitness #valor semilla
+        f_min = poblacion[0].fitness         #valor semilla
         for individuo in poblacion:
             if individuo.fitness <= f_min and individuo not in seleccionados:
                 f_min = individuo.fitness
                 seleccionados[i] = individuo
         i += 1
-    for ind in seleccionados:
-        ind.seleccionado = True #flag de q fue seleccionado
     return seleccionados
 
-def crossover(seleccionados): #Crossover por cruce de orden
+def crossover(seleccionados):               #Crossover por cruce de orden
     for i in range(0,len(seleccionados),2): #los seleccionados pares
-        corte1 = rd.randint(1,46) #el 1 y 46 aseguran q haya al menos un nro a cada lado
-        corte2 = rd.randint(1,46)
-        listaA = seleccionados[i].genes #para tener un nombre +corto
+        corte1 = rd.randint(1,46)           #1 y 46 aseguran q haya al menos un nro a cada lado
+        corte2 = rd.randint(1,46)           #recordar que el ultimo indice es 47
+        listaA = seleccionados[i].genes     #para tener un nombre +corto
         listaB = seleccionados[i+1].genes
-        while corte1 == corte2: #por si se llegara a repetir
+        while corte1 == corte2:             #por si se llegara a repetir
             corte2 = rd.randint(1,46)
-        if corte1 > corte2: #para mantener que cruce 1 sea menor que cruce2
-            aux = corte1
-            corte1 = corte2
-            corte2 = aux
+        if corte1 > corte2:                 #para mantener que cruce 1 sea menor que cruce2
+            corte1,corte2 = corte2,corte1
         newA = []
         newB = []
         for m in range(len(listaA)):
             newA.append(0)
             newB.append(0)
-        for j in range(corte1,corte2):
-            print(j)
+        for j in range(corte1,corte2+1):    #corte 2 inclusive, por esto el +1
             newA[j] = listaB[j]
             newB[j] = listaA[j]
-        it = corte2+1 #sirve para iterar ---LISTA A
-        actual = it #donde se va a guardar
+        it = corte2+1                       #sirve para iterar ---LISTA A
+        actual = it                         #donde se va a guardar
         while actual != corte1:
             if actual == len(listaA):
                 actual = 0
@@ -121,8 +112,8 @@ def crossover(seleccionados): #Crossover por cruce de orden
             newA[actual] = num
             actual += 1
 
-        it = corte2+1 #sirve para iterar ---LISTA B
-        actual = it #donde se va a guardar
+        it = corte2+1                       #sirve para iterar ---LISTA B
+        actual = it                         #donde se va a guardar
         while actual != corte1:
             if actual == len(listaB):
                 actual = 0
@@ -139,22 +130,19 @@ def crossover(seleccionados): #Crossover por cruce de orden
     return seleccionados
 
 def mutacion(seleccionados):
-    for i in range(len(seleccionados)):
+    for ind in seleccionados:
         probab_de_mutar = rd.random()
-        if probab_de_mutar < 0.1:
+        if probab_de_mutar < 0.15:
             gen1 = rd.randint(0,47)
             gen2 = rd.randint(0,47)
-            while gen1 == gen2: #por si se llegara a repetir
+            while gen1 == gen2:         #por si se llegara a repetir
                 gen2 = rd.randint(0,47)
-            #intercambian dos genes
-            aux = seleccionados[i].genes[gen1]
-            seleccionados[i].genes[gen1] = seleccionados[i].genes[gen2]
-            seleccionados[i].genes[gen2] = aux
+            ind.genes[gen1],ind.genes[gen2] = ind.genes[gen2],ind.genes[gen1]
     return seleccionados
 
 def buscar_el_mejor(poblacion):
-    fitness_min = poblacion[0].fitness
-    mejor = poblacion[0]
+    fitness_min = poblacion[0].fitness #semilla de fitness
+    mejor = poblacion[0]               #semilla de individuo
     for individuo in poblacion:
         if individuo.fitness < fitness_min:
             fitness_min = individuo.fitness
@@ -163,22 +151,19 @@ def buscar_el_mejor(poblacion):
 
 def genetic_algoritm():
     all_PL = create_picking_list() #3)
-    n_poblacion = 8 #len(all_PL)) <-- <-- <-- <-- <-- <--TAMAÑO DE POBLACION
+    n_poblacion = 30 #<-- <-- <-- <-- <-- <--TAMAÑO DE POBLACION
     poblacion = generar_primer_poblacion(n_poblacion) 
     
     generacion = 0
-    max_generacion = 5
+    max_generacion = 10
 
     while(generacion<max_generacion): #criterio de parada: tiempo transcurrido
-        
         print("----\nGeneracion",generacion+1,"\nSeleccion")
         seleccionados = seleccion(poblacion,n_poblacion,all_PL)
         print("Cross-over")
         seleccionados = crossover(seleccionados)
         print("Mutacion")
-        seleccionados = mutacion(seleccionados)     
-        for i in poblacion:
-            i.seleccionado = False
+        seleccionados = mutacion(seleccionados)
         generacion += 1
     print("El mejor individuo de la poblacion es:")
     mejor=buscar_el_mejor(poblacion)
