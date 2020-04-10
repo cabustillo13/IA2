@@ -1,8 +1,8 @@
-#Aplicación del algoritmo A* para la obtención de un camino óptimo dentro de un almacén
+# Aplicación del algoritmo A* para la obtención de un camino óptimo dentro de un almacén
 
-##Calculo de la trayecoria óptima de un brazo robótico de 6 grados de libertad
+## Calculo de la trayecoria óptima de un brazo robótico de 6 grados de libertad
 
-Para la trayectoria del brazo robótico se usa una función llamada _generate_map_, que admite un parametro (_tam_: cantidad de puntos por cada dirección), genera un mapa en 6D con esa cantidad de puntos.  Luego se generan los obstáculos, se definió arbitrariamente que el 10% del espacio articular esté ocupado por obstáculos. Se calcula como (cant. de punt**6/100), por eso se eleva tan rápido el tiempo de ejecución a medida que se aumenta la cantidad de puntos. Se han usado 15 puntos.
+Para la trayectoria del brazo robótico se usa una función llamada _generate_map_, que admite un parametro (_tam_: cantidad de puntos por cada dirección), genera un mapa en 6D con esa cantidad de puntos.  Luego se generan los obstáculos, se definió arbitrariamente que el 10% del espacio articular esté ocupado por obstáculos. Se calcula como (cant. de punt elevado a 6/100), por eso se eleva tan rápido el tiempo de ejecución a medida que se aumenta la cantidad de puntos. Se han usado 15 puntos.
 Se generaron posiciones iniciales y finales entre 0 y la cantidad de puntos menos 1 y luego se aplicó el algoritmo A*. Luego a través de un condicional se evalúa si la posición está en los obstáculos, no se lo agrega como vecino de la posición actual.
 Se guarda el camino en la variable path para cada nodo y devuelve el mismo.
 
@@ -19,12 +19,12 @@ Para localizar las posiciones entre las cuales realizar la búsqueda se usa la f
 
 Cada vez que el nodo avanza se guarda el camino generado por el mismo de la siguiente manera: luego de llegar al nodo objetivo, se recorre ese nodo en sentido inverso a través del padre de cada nodo hasta llegar al nodo raiz.  
 
-#Aplicación de Temple Simulado para la obtención del orden óptimo de picking de un almacén
+# Aplicación de Temple Simulado para la obtención del orden óptimo de picking de un almacén
 
 El objetivo de este problema es obtener el orden óptimo para la operación de _picking_ en un almacén, utilizando el método de Temple simulado.
 
 
-##Algoritmo
+## Algoritmo
 A continuación se hace mención de los parámetros que intervienen en el algoritmo:
 -Estado inicial: En este caso el estado inicial es una lista que contiene las posiciones en donde se debe realizar el picking (las posiciones por las que debo pasar). Estas están ubicadas de manera aleatoria en la lista.
 
