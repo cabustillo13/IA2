@@ -72,7 +72,12 @@ def seleccion(poblacion,n_poblacion,all_PL): #selecciono los k mejores (20%)
     for m in range(k):
         seleccionados.append(Individuo())
     while i!=k:
-        f_min = poblacion[0].fitness         #valor semilla
+        j = 0
+        f_min = poblacion[j].fitness         #valor semilla
+        while poblacion[j] in seleccionados: #corrige cuando el 1er elemento fue seleccionado->ya no sirve de semilla
+            j += 1
+            f_min = poblacion[j].fitness
+            
         for individuo in poblacion:
             if individuo.fitness <= f_min and individuo not in seleccionados:
                 f_min = individuo.fitness
@@ -95,6 +100,7 @@ def crossover(seleccionados):               #Crossover por cruce de orden
         for m in range(len(listaA)):
             newA.append(0)
             newB.append(0)
+
         for j in range(corte1,corte2+1):    #corte 2 inclusive, por esto el +1
             newA[j] = listaB[j]
             newB[j] = listaA[j]
@@ -151,11 +157,11 @@ def buscar_el_mejor(poblacion):
 
 def genetic_algoritm():
     all_PL = create_picking_list() #3)
-    n_poblacion = 30 #<-- <-- <-- <-- <-- <--TAMAÑO DE POBLACION
+    n_poblacion = 40 #<-- <-- <-- <-- <-- <--TAMAÑO DE POBLACION
     poblacion = generar_primer_poblacion(n_poblacion) 
     
     generacion = 0
-    max_generacion = 10
+    max_generacion = 50
 
     while(generacion<max_generacion): #criterio de parada: tiempo transcurrido
         print("----\nGeneracion",generacion+1,"\nSeleccion")
