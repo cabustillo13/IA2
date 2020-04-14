@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 def graficar(tarea,d,deadline):
     #Cada maquina se representa con un color cuando una tarea la este utilizando
     #Torno: azul (b)
-    #Equipo para pinta: rojo (r)
+    #Equipo para pintar: rojo (r)
     #Pulidora: magenta (m)
     #Horno: amarillo(y)
     #Enamblaje: cyan(c)
