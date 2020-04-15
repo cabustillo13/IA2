@@ -3,6 +3,9 @@ import numpy as np
 from time import time
 import random as rd
 import math
+import matplotlib
+import matplotlib.pyplot as plt
+    
 
 def fitness(P_list,map): #calcula el fitness de cierto orden de una lista
     aux = P_list[:]
@@ -24,15 +27,13 @@ def swap_positions(current):
     return next
 
 def plot_solution(time_list,prob_list):
-    import matplotlib
-    import matplotlib.pyplot as plt
     fig, ax = plt.subplots()
     ax.plot(time_list, prob_list)
     ax.set(xlabel='Tiempo', ylabel='Probabilidad')
     ax.grid()
     plt.show()      
 
-def simulated_annealing(picking_list,order,want_to_print):
+def simulated_annealing(picking_list,order=[m for m in range(1,49)],want_to_print=True):
     map=generate_map(order)
     time=1
     max_time = T = 1000 #coincide con la T inicial
@@ -41,9 +42,9 @@ def simulated_annealing(picking_list,order,want_to_print):
     current = picking_list[:]
     if want_to_print:
         print("Distancia inicial:",fitness(picking_list,map),"con lista:",picking_list)
-    #-----------------Inicializando variables-------------
+    #----------Fin de inicializacion de variables----------
     while True:
-        T = 0.92*T #math.exp(1/time) #max_time-0.9*time #decrecimiento lineal
+        T = 0.92*T #decrecimiento exponencial
         if T<0.1 or time > max_time:
             dist_min = fitness(current,map)
             if want_to_print:
@@ -57,8 +58,8 @@ def simulated_annealing(picking_list,order,want_to_print):
         f_current = fitness(current,map)
         delta_E = f_next - f_current 
 
-        value = rd.random() #nro aleatorio entre 0 and 1
-        prob = math.exp(-delta_E/(1*T)) #0.10 para abajo es conveniente
+        value = rd.random()             #nro aleatorio entre 0 and 1
+        prob = math.exp(-delta_E/(1*T)) 
         if delta_E <= 0:
             current = next
         elif value < prob:
@@ -70,10 +71,9 @@ def simulated_annealing(picking_list,order,want_to_print):
 def main():
     print("Ejercicio 5:") 
     rd.seed(None)
-    picking_list = [37, 47, 11, 48, 24]
-    order = [12, 3, 20, 36, 32, 37, 1, 2, 4, 23, 39, 9, 19, 40, 46, 29, 27, 35, 45, 13, 16, 14, 24, 11, 48, 6, 7, 25, 5, 47, 15, 41, 43, 22, 8, 34, 26, 42, 38, 21, 33, 31, 30, 28, 17, 18, 10, 44]   
+    picking_list = [37,47,11,48,24,15,2]
     t1=time()
-    simulated_annealing(picking_list,order,True)
+    simulated_annealing(picking_list)
     t2=time()
     print("Tiempo de ejecucion:",round(t2-t1,4),"segundos")
 

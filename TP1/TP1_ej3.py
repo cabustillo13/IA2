@@ -16,7 +16,7 @@ class Nodo:
     def calculate_f(self): 
         self.f = self.g+self.h
 
-def generate_map(order=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48],n_rows_shelves=3,n_columns_shelves=2): #Se pueden pasar parametros y que adopte estos pero por defecto es como en el TP
+def generate_map(order=[m for m in range(1,49)],n_rows_shelves=3,n_columns_shelves=2): #Se pueden pasar parametros y que adopte estos pero por defecto es como en el TP
     n_rows = 5*n_rows_shelves+1
     n_columns = 4*n_columns_shelves
     x=1
