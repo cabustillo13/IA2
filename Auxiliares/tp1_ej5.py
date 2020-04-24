@@ -28,7 +28,11 @@ def distancia(val, mapa):
 def simulated_annealing(val,mapa, T):
     #Definición de Constantes
     #Ti=100
-    Tf=0
+    
+    
+    Tf=0.1      #modificar acá
+
+
     #c=0.9       #Cte de enfriamiento(entre 0 y 1)
     n=10        #Número de saltos hasta el equilibrio
     #K=1         #Cte de Boltzman: le podemos dar otro valor
@@ -73,7 +77,7 @@ def simulated_annealing(val,mapa, T):
                     X = X_aux
                     E = E_aux
             #z +=1
-        T -= 1 #(c*T)
+        T = 0.92*T #(c*T) -=1
     print("Solución última: ", X)
     print("Energía: ", E)
     print("Mejor orden: ", min_X)
@@ -96,16 +100,26 @@ if __name__ == "__main__":
     #print("tiempo del algoritmo: ", (finish-init))
     
     #Aca cambie cosas (hasta plt.show)
-    T=250
-    mejora=[]
-    Tiempo=[]
-    while T<2500:
-        dist, change = simulated_annealing(val,mapa, T)
-        mejora.append(change)
-        Tiempo.append(T)
-        T +=250
-    plt.plot(Tiempo, mejora, 'b')
-    plt.xscale('log')
+    for i in range(1,10):
+        T=100
+        mejora=[]
+        Tiempo=[]
+        temple = []
+        flag = True
+        
+        while flag == True:
+            dist, change = simulated_annealing(val,mapa, T)
+            mejora.append(change)
+            Tiempo.append(T)
+            if T == 500:
+                flag = False
+            
+            T +=50
+        plt.plot(Tiempo, mejora)
+        plt.xscale('log')
+        plt.suptitle('Mejora de la respuesta en función al tiempo', fontsize = 20)
+        plt.xlabel('Temperatura', fontsize = 16)
+        plt.ylabel('Mejora %', fontsize = 16)
     plt.show()
 
     #Tener en cuenta para pasar de número a posicion ya no va a funcionar el análisis anterior

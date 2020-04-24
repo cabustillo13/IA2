@@ -39,15 +39,15 @@ def simulated_annealing(picking_list,order,want_to_print,T):
     prob_list = [] #para plotear
     time_list = [] #para plotear
     current = picking_list[:]
-    if want_to_print:
-        print("Distancia inicial:",fitness(picking_list,map),"con lista:",picking_list)
+    #if want_to_print:
+    #    print("Distancia inicial:",fitness(picking_list,map),"con lista:",picking_list)
     #-----------------Inicializando variables-------------
     while True:
-        T = T/2 #math.exp(1/time) #max_time-0.9*time #decrecimiento lineal
+        T = T-1 #math.exp(1/time) #max_time-0.9*time #decrecimiento lineal
         if T<0.1 or time > max_time:
             dist_min = fitness(current,map)
             if want_to_print:
-                #plot_solution(time_list,prob_list)
+            #    plot_solution(time_list,prob_list)
                 print("Distancia minima:",dist_min,"con lista:",current)
                 mejora=(fitness(picking_list,map)-dist_min)/(fitness(picking_list,map))
                 print("Mejora: ", mejora)
@@ -79,17 +79,35 @@ def main():
     #simulated_annealing(picking_list,order,T,True)
     #t2=time()
     #print("Tiempo de ejecucion:",round(t2-t1,4),"segundos")
-    T = 250
-    Tiempo=[]
-    mejora=[]
-    #for i in range (0,100):
-    while T<5000:
-        dist, change = simulated_annealing(picking_list,order,T,True)
-        mejora.append(change)
-        Tiempo.append(T)
-        T +=250
-    plt.plot(Tiempo, mejora, 'b')
-    plt.xscale('log')
-    plt.show()
+
+    #hacer un for de 1 a 100 y de ahi guardar en un vector, luego hacer otro for para plotear (ver de hacer en el mismo for)
+    for i in range (1,10):
+        T = 2500
+        Tiempo=[]
+        mejora=[]
+        temple = [] #lista de estados
+        flag = True
+        while flag == True:
+            t, improvement = simulated_annealing(picking_list,order,T,True)
+            temple.append(improvement)
+            Tiempo.append(T)
+            #print("TEMPLE: ", temple)
+
+            if T == 5000:
+                flag = False
+            T +=250      
+
+        plt.plot(Tiempo,temple)
+        plt.suptitle('Mejora de la respuesta en función al tiempo', fontsize = 20)
+        plt.xlabel('Temperatura T=250', fontsize = 16)
+        plt.ylabel('Mejora %', fontsize = 16)
+    plt.show()        
+
+
+
+   
+
+    
+
 if __name__ == "__main__":
     main()

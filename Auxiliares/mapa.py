@@ -32,3 +32,4 @@ if __name__ == "__main__":
     y = generate_map()
     print (y)
     print(len(y))
+    print("len y[0]: ", len(y[0]) )
