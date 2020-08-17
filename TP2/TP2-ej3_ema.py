@@ -3,8 +3,10 @@ from matplotlib import pyplot as plt
 from math import cos, sin, pow, pi
 import numpy as np
 
-class Theta:
+delta_t=0.001                             #0.001
+x = np.arange(-90, 90, delta_t)
 
+class Theta:
     def __init__(self, valor,ng_center,np_center,z_center,pp_center,pg_center):
         self.NG=[]
         self.NP=[]
@@ -12,27 +14,20 @@ class Theta:
         self.PP=[]
         self.PG=[]
         self.valor=valor                                        #valor actual cambia en cada iteracion (de abcisa)
-        self.center = {'NG': 0,'NP': 0,'Z': 0,'PP': 0,'PG': 0}
+        self.center = {'NG': ng_center,'NP': np_center,'Z': z_center,'PP': pp_center,'PG': pg_center}
         self.mu = {'NG': 0,'NP': 0,'Z': 0,'PP': 0,'PG': 0}      #valor de mu en cada particion SE QUEDA CON EL ULTIMO
 
-#quiero poner el valor (posicion de cada tita o tita-punto) -> obtener cada mu (para cada particion)
-    def calcula_funcion(self, conjunto, delta_t):
-        self.valor=conjunto
+    def calcula_funcion(self, valor, delta_t):
+        self.valor = valor
         #valor de la ordenada deseada sumandole 90 que es desde donde empieza el vector y dividiendo por los pasos
-        self.mu['NG'] = self.NG[int((conjunto+90)/delta_t)]
-        self.mu['NP'] = self.NP[int((conjunto+90)/delta_t)]
-        self.mu['Z'] = self.Z[int((conjunto+90)/delta_t)]
-        self.mu['PP'] = self.PP[int((conjunto+90)/delta_t)]
-        self.mu['PG'] = self.PG[int((conjunto+90)/delta_t)]
+        self.mu['NG'] = self.NG[int((valor+90)/delta_t)]
+        self.mu['NP'] = self.NP[int((valor+90)/delta_t)]
+        self.mu['Z'] = self.Z[int((valor+90)/delta_t)]
+        self.mu['PP'] = self.PP[int((valor+90)/delta_t)]
+        self.mu['PG'] = self.PG[int((valor+90)/delta_t)]
         
-
-
-
-
-#puede ser un metodo tambien
-def conjunto_borroso(min, max, center, x, tag):
-    '''
-    Creación de la partición borrosa, se tuvieron en cuenta 5 conjuntos borrosos'''
+def conjunto_borroso(min, max, center, tag):
+    #Creación de la partición borrosa, se tuvieron en cuenta 5 conjuntos borrosos
     y = []
     for i in x:
         if tag == 'NG':
@@ -61,27 +56,27 @@ def conjunto_borroso(min, max, center, x, tag):
             y.append(z)
     return(y)
 
-def simular(t_max, delta_t, theta_0, v_0, a_0):
-   
+def simular(t_max, delta_t, theta_0, v_0, a_0, F):
     theta = (theta_0 * np.pi) / 180
     v = v_0
     a = a_0
     y = []
-    x = np.arange(0, t_max, delta_t)
-    for t in x:
-        a = calcula_aceleracion(theta, v, 0)
+    T = np.arange(0, t_max, delta_t)
+    index=0
+    for t in T:
+        a = calcula_aceleracion(theta, v, F[index])
         v = v + a * delta_t
         theta = theta + v * delta_t + a * np.power(delta_t, 2) / 2
         y.append(theta)
+        index += 1 
 
-    fig, ax = plt.subplots()
-    ax.plot(x, y)
+    # fig, ax = plt.subplots()
+    # ax.plot(x, y)
 
-    ax.set(xlabel='time (s)', ylabel='theta', title='Delta t = ' + str(delta_t) + " s")
-    ax.grid()
+    # ax.set(xlabel='time (s)', ylabel='theta', title='Delta t = ' + str(delta_t) + " s")
+    # ax.grid()
     
-    plt.show()
-
+    # plt.show()
 
 # Calcula la aceleracion en el siguiente instante de tiempo dado el angulo y la velocidad angular actual, y la fuerza ejercida
 def calcula_aceleracion(theta, v, f):
@@ -95,76 +90,80 @@ def calcula_aceleracion(theta, v, f):
     denominador = l * (4/3 - (m * np.power(np.cos(theta), 2) / (M + m)))
     return numerador / denominador
 
-if __name__ == "__main__":
-    delta_t=0.001                             #0.001
-    x = np.arange(-90, 90, delta_t)
-    simular(10, 0.0001, 45, 0, 0)
-    #Partición Borrosa de Theta
-    NP = ['NP', conjunto_borroso(-25, -5, -15, x,'NP')]
-    Z = ['Z', conjunto_borroso(-10, 10, 0, x,'Z')]
-    PP = ['PP', conjunto_borroso(5, 25, 15, x,'PP')]
-    NG = ['NG', conjunto_borroso(-30, -20, 0, x,'NG')]
-    PG = ['PG', conjunto_borroso(20, 30, 0, x,'PG')]
-
-    theta = Theta(1,0,-15,0,15,0)
+def crea_Theta():
+    theta = Theta(1,-25,-15,0,15,25)
+    NG = ['NG', conjunto_borroso(-30, -20, theta.center['NG'],'NG')]
+    NP = ['NP', conjunto_borroso(-25, -5, theta.center['NP'],'NP')]
+    Z = ['Z', conjunto_borroso(-10, 10, theta.center['Z'],'Z')]
+    PP = ['PP', conjunto_borroso(5, 25, theta.center['PP'],'PP')]
+    PG = ['PG', conjunto_borroso(20, 30, theta.center['PG'],'PG')]
     theta.NG=NG[1]
     theta.NP=NP[1]
     theta.Z=Z[1]
     theta.PP=PP[1]
     theta.PG=PG[1]
+    return theta
 
-    #Partición Borrosa de velocidad angular
-    NP = ['NP', conjunto_borroso(-25, -5, -15, x,'NP')]
-    Z = ['Z', conjunto_borroso(-10, 10, 0, x,'Z')]
-    PP = ['PP', conjunto_borroso(5, 25, 15, x,'PP')]
-    NG = ['NG', conjunto_borroso(-30, -20, 0, x,'NG')]
-    PG = ['PG', conjunto_borroso(20, 30, 0, x,'PG')]
-
-    velocidad = Theta(1,0,-15,0,15,0)
+def crea_Theta_p():
+    velocidad = Theta(1,-50,-30,0,30,50)
+    NG = ['NG', conjunto_borroso(-60, -40, theta.center['NG'],'NG')]
+    NP = ['NP', conjunto_borroso(-50, -10, theta.center['NP'],'NP')]
+    Z = ['Z', conjunto_borroso(-20, 20, theta.center['Z'],'Z')]
+    PP = ['PP', conjunto_borroso(10, 50, theta.center['PP'],'PP')]
+    PG = ['PG', conjunto_borroso(40, 60, theta.center['PG'],'PG')]
     velocidad.NG=NG[1]
     velocidad.NP=NP[1]
     velocidad.Z=Z[1]
     velocidad.PP=PP[1]
     velocidad.PG=PG[1]
-                       
-    theta.calcula_funcion(15,0.001)
-    velocidad.calcula_funcion(9,0.001)
+    return velocidad
 
-    #Buscar los mu distintos de 0 para maximo-> discriminar =0 y tomar el minimo
-    #Tal vez no haga falta-> cumplir con reglas
-    def minimo(objeto):
-        minimo=1
-        for item in theta.mu:
-            if (theta.mu[item]!=0 and theta.mu[item]<minimo):
-                minimo = theta.mu[item] 
-    #Conjunto borroso de Fuerza
-    #creacion de Particion Borrosa
-    fuerza= Theta(1,0,-15,0,15,0)
-    NP = ['NP', conjunto_borroso(-25, -5, -15, x,'NP')]
-    Z = ['Z', conjunto_borroso(-10, 10, 0, x,'Z')]
-    PP = ['PP', conjunto_borroso(5, 25, 15, x,'PP')]
-    NG = ['NG', conjunto_borroso(-30, -20, 0, x,'NG')]
-    PG = ['PG', conjunto_borroso(20, 30, 0, x,'PG')]
+def crea_fuerza():
+    fuerza = Theta(0,-250,-150,0,150,250)    
+    NG = ['NG', conjunto_borroso(-300, -200, theta.center['NG'],'NG')]
+    NP = ['NP', conjunto_borroso(-250, -50, theta.center['NP'],'NP')]
+    Z = ['Z', conjunto_borroso(-100, 100, theta.center['Z'],'Z')]
+    PP = ['PP', conjunto_borroso(50, 250, theta.center['PP'],'PP')]
+    PG = ['PG', conjunto_borroso(200, 300, theta.center['PG'],'PG')]
+    fuerza.NG=NG[1]
+    fuerza.NP=NP[1]
+    fuerza.Z=Z[1]
+    fuerza.PP=PP[1]
+    fuerza.PG=PG[1]
+    return fuerza
 
-    fuerza.calcula_funcion(0,0.001)         #SE PODRIA BORRAR
+if __name__ == "__main__":  
+    theta = crea_Theta()
+    velocidad = crea_Theta_p()
+    fuerza = crea_fuerza()
+    
+    fuerza_lista = []
 
-    #Reglas de inferencia
-    fuerza.mu['NG']=max(min(theta.mu['NG'],velocidad.mu['NG']),min(theta.mu['NP'],velocidad.mu['NG']), min(theta.mu['Z'],velocidad.mu['NG']), min(theta.mu['NG'],velocidad.mu['NP']), min(theta.mu['NP'],velocidad.mu['NP']), min(theta.mu['NG'],velocidad.mu['Z']))
-    fuerza.mu['NP']=max(min(theta.mu['PP'],velocidad.mu['NG']), min(theta.mu['Z'],velocidad.mu['NP']), min(theta.mu['NP'],velocidad.mu['Z']), min(theta.mu['NG'],velocidad.mu['PP']))
-    fuerza.mu['Z']=max(min(theta.mu['PG'],velocidad.mu['NG']), min(theta.mu['PP'],velocidad.mu['NP']), min(theta.mu['Z'],velocidad.mu['Z']), min(theta.mu['NP'],velocidad.mu['PP']), min(theta.mu['NG'],velocidad.mu['PG']))
-    fuerza.mu['PP']=max(min(theta.mu['PG'],velocidad.mu['NP']), min(theta.mu['PP'],velocidad.mu['Z']), min(theta.mu['Z'],velocidad.mu['PP']), min(theta.mu['NP'],velocidad.mu['PG']))
-    fuerza.mu['PG']=max(min(theta.mu['PG'],velocidad.mu['Z']), min(theta.mu['PG'],velocidad.mu['PP']), min(theta.mu['PG'],velocidad.mu['PG']), min(theta.mu['PP'],velocidad.mu['PP']), min(theta.mu['PP'],velocidad.mu['PG']), min(theta.mu['Z'],velocidad.mu['PG']))
+    for t in range(len(x)):
 
-#OBTENER LA POSICION DE F (DESBORROSIFICAR)->Función aparte
+        theta.calcula_funcion(15,0.001) #Como obtener los nuevos valores de theta y v??
+        velocidad.calcula_funcion(9,0.001)
+        
+        #Reglas de inferencia
+        fuerza.mu['NG']=max(min(theta.mu['NG'],velocidad.mu['NG']),min(theta.mu['NP'],velocidad.mu['NG']), min(theta.mu['Z'],velocidad.mu['NG']), min(theta.mu['NG'],velocidad.mu['NP']), min(theta.mu['NP'],velocidad.mu['NP']), min(theta.mu['NG'],velocidad.mu['Z']))
+        fuerza.mu['NP']=max(min(theta.mu['PP'],velocidad.mu['NG']), min(theta.mu['Z'],velocidad.mu['NP']), min(theta.mu['NP'],velocidad.mu['Z']), min(theta.mu['NG'],velocidad.mu['PP']))
+        fuerza.mu['Z']=max(min(theta.mu['PG'],velocidad.mu['NG']), min(theta.mu['PP'],velocidad.mu['NP']), min(theta.mu['Z'],velocidad.mu['Z']), min(theta.mu['NP'],velocidad.mu['PP']), min(theta.mu['NG'],velocidad.mu['PG']))
+        fuerza.mu['PP']=max(min(theta.mu['PG'],velocidad.mu['NP']), min(theta.mu['PP'],velocidad.mu['Z']), min(theta.mu['Z'],velocidad.mu['PP']), min(theta.mu['NP'],velocidad.mu['PG']))
+        fuerza.mu['PG']=max(min(theta.mu['PG'],velocidad.mu['Z']), min(theta.mu['PG'],velocidad.mu['PP']), min(theta.mu['PG'],velocidad.mu['PG']), min(theta.mu['PP'],velocidad.mu['PP']), min(theta.mu['PP'],velocidad.mu['PG']), min(theta.mu['Z'],velocidad.mu['PG']))
 
-    num=0
-    den=0
-    for index, i in enumerate(fuerza.mu):
-        num += i*fuerza.center[index]
-        den += i
-    Posicion_F= num/den
+        aa = list(fuerza.center.values())
+        #DESBORROSIFICACION
+        num = 0
+        den = 0
+        fuerza_c = list(fuerza.center.values())
+        for index, i in enumerate(list(fuerza.mu.values())):
+            num += i*fuerza_c[index]
+            den += i
+        fuerza.valor = num/den
+        fuerza_lista.append(fuerza.valor)
 
-#Hacer una funcion aparte para los plots
+    simular(10,0.0001,45,0,0,fuerza_lista)
+
 #    plt.plot(x, NP[1], label="NP")
 #    plt.plot(x, Z[1], label="Z")
 #    plt.plot(x, PP[1], label="PP")
