@@ -24,10 +24,6 @@ class Theta:
         self.mu['Z'] = self.Z[int((conjunto+90)/delta_t)]
         self.mu['PP'] = self.PP[int((conjunto+90)/delta_t)]
         self.mu['PG'] = self.PG[int((conjunto+90)/delta_t)]
-        
-
-
-
 
 #puede ser un metodo tambien
 def conjunto_borroso(min, max, center, x, tag):
@@ -86,10 +82,9 @@ def calcula_aceleracion(theta, v, F):
     return numerador / denominador
 
 if __name__ == "__main__":
-    delta_t=0.1                             #0.001
-    
+    delta_t = 0.1                           #0.001    
     x = np.arange(-90, 90, delta_t)         #Cambiar parámetros, para los conj borrosos hacer igual pero con otro dominio
-    #en simular cambiar los parametros por variables y poner los iniciales arriba del for
+                                        #en simular cambiar los parametros por variables y poner los iniciales arriba del for
 
     F=0
     theta_ang=45
@@ -98,85 +93,83 @@ if __name__ == "__main__":
     y=[]
     y1=[]
     y2=[]
-    #Aca hacer el for
-    for t in x:
+
+
+    #Partición Borrosa de Theta
+    NP = ['NP', conjunto_borroso(-25, -5, -15, x,'NP'), -15]
+    Z = ['Z', conjunto_borroso(-10, 10, 0, x,'Z'), 0]
+    PP = ['PP', conjunto_borroso(5, 25, 15, x,'PP'), 15]
+    NG = ['NG', conjunto_borroso(-30, -20, 0, x,'NG'), -20]
+    PG = ['PG', conjunto_borroso(20, 30, 0, x,'PG'), 20]
+
+    theta = Theta(1)
+    theta.NG=NG[1]
+    theta.NP=NP[1]
+    theta.Z=Z[1]
+    theta.PP=PP[1]
+    theta.PG=PG[1]
+
+    #Centro de cada conjunto borroso
+    theta.center['NG']=NG[2]
+    theta.center['NP']=NP[2]
+    theta.center['Z']=Z[2]
+    theta.center['PP']=PP[2]
+    theta.center['PG']=PG[2]    
+
+    #Partición Borrosa de velocidad angular
+    NP = ['NP', conjunto_borroso(-25, -5, -15, x,'NP'), -15]
+    Z = ['Z', conjunto_borroso(-10, 10, 0, x,'Z'), 0]
+    PP = ['PP', conjunto_borroso(5, 25, 15, x,'PP'), 15]
+    NG = ['NG', conjunto_borroso(-30, -20, 0, x,'NG'), -20]
+    PG = ['PG', conjunto_borroso(20, 30, 0, x,'PG'), 20]
+
+    velocidad = Theta(1)
+    velocidad.NG=NG[1]
+    velocidad.NP=NP[1]
+    velocidad.Z=Z[1]
+    velocidad.PP=PP[1]
+    velocidad.PG=PG[1]
+    #Centro de cada conjunto borroso
+    
+    velocidad.center['NG']=NG[2]
+    velocidad.center['NP']=NP[2]
+    velocidad.center['Z']=Z[2]
+    velocidad.center['PP']=PP[2]
+    velocidad.center['PG']=PG[2]    
+                    
+    theta.calcula_funcion(15,delta_t)
+    velocidad.calcula_funcion(9,delta_t)
+
+    #Conjunto borroso de Fuerza
+    #creacion de Particion Borrosa
+    NP = ['NP', conjunto_borroso(-25, -5, -15, x,'NP'), -15]
+    Z = ['Z', conjunto_borroso(-10, 10, 0, x,'Z'), 0]
+    PP = ['PP', conjunto_borroso(5, 25, 15, x,'PP'), 15]
+    NG = ['NG', conjunto_borroso(-30, -20, 0, x,'NG'), -20]
+    PG = ['PG', conjunto_borroso(20, 30, 0, x,'PG'), 20]
+    
+    fuerza= Theta(1)
+
+    fuerza.NG=NG[1]
+    fuerza.NP=NP[1]
+    fuerza.Z=Z[1]
+    fuerza.PP=PP[1]
+    fuerza.PG=PG[1]
+    #Centro de cada conjunto borroso
+    
+    fuerza.center['NG']=NG[2]
+    fuerza.center['NP']=NP[2]
+    fuerza.center['Z']=Z[2]
+    fuerza.center['PP']=PP[2]
+    fuerza.center['PG']=PG[2]
+
+    #Vector para guardar cosas para el grafico
+   
+    dominio = np.arange(0, 180, delta_t) 
+    #Aca hacer el for-> ver While y tomar una tolerancia (guardar en un vector base)->primero crear los objetos y despues solo cambiar atributos
+    for t in dominio:
         ang, vel, acel = simular(theta_ang, v, a, F)
-        
-        y.append(ang)
-        y1.append(vel)
-        y2.append(acel)
-
-        #Partición Borrosa de Theta
-        NP = ['NP', conjunto_borroso(-25, -5, -15, x,'NP'), -15]
-        Z = ['Z', conjunto_borroso(-10, 10, 0, x,'Z'), 0]
-        PP = ['PP', conjunto_borroso(5, 25, 15, x,'PP'), 15]
-        NG = ['NG', conjunto_borroso(-30, -20, 0, x,'NG'), -20]
-        PG = ['PG', conjunto_borroso(20, 30, 0, x,'PG'), 20]
-
-        theta = Theta(1)
-        theta.NG=NG[1]
-        theta.NP=NP[1]
-        theta.Z=Z[1]
-        theta.PP=PP[1]
-        theta.PG=PG[1]
-
-        #Centro de cada conjunto borroso
-        theta.center['NG']=NG[2]
-        theta.center['NP']=NP[2]
-        theta.center['Z']=Z[2]
-        theta.center['PP']=PP[2]
-        theta.center['PG']=PG[2]    
-
-        #Partición Borrosa de velocidad angular
-        NP = ['NP', conjunto_borroso(-25, -5, -15, x,'NP'), -15]
-        Z = ['Z', conjunto_borroso(-10, 10, 0, x,'Z'), 0]
-        PP = ['PP', conjunto_borroso(5, 25, 15, x,'PP'), 15]
-        NG = ['NG', conjunto_borroso(-30, -20, 0, x,'NG'), -20]
-        PG = ['PG', conjunto_borroso(20, 30, 0, x,'PG'), 20]
-
-        velocidad = Theta(1)
-        velocidad.NG=NG[1]
-        velocidad.NP=NP[1]
-        velocidad.Z=Z[1]
-        velocidad.PP=PP[1]
-        velocidad.PG=PG[1]
-        #Centro de cada conjunto borroso
-        
-        velocidad.center['NG']=NG[2]
-        velocidad.center['NP']=NP[2]
-        velocidad.center['Z']=Z[2]
-        velocidad.center['PP']=PP[2]
-        velocidad.center['PG']=PG[2]    
-                        
-        theta.calcula_funcion(15,delta_t)
-        velocidad.calcula_funcion(9,delta_t)
-
-        #Conjunto borroso de Fuerza
-        #creacion de Particion Borrosa
-        NP = ['NP', conjunto_borroso(-25, -5, -15, x,'NP'), -15]
-        Z = ['Z', conjunto_borroso(-10, 10, 0, x,'Z'), 0]
-        PP = ['PP', conjunto_borroso(5, 25, 15, x,'PP'), 15]
-        NG = ['NG', conjunto_borroso(-30, -20, 0, x,'NG'), -20]
-        PG = ['PG', conjunto_borroso(20, 30, 0, x,'PG'), 20]
-        
-        fuerza= Theta(1)
-
-
-        fuerza.NG=NG[1]
-        fuerza.NP=NP[1]
-        fuerza.Z=Z[1]
-        fuerza.PP=PP[1]
-        fuerza.PG=PG[1]
-        #Centro de cada conjunto borroso
-        
-        fuerza.center['NG']=NG[2]
-        fuerza.center['NP']=NP[2]
-        fuerza.center['Z']=Z[2]
-        fuerza.center['PP']=PP[2]
-        fuerza.center['PG']=PG[2]    
-
         fuerza.calcula_funcion(10,delta_t)         #SE PODRIA BORRAR
-
         #Reglas de inferencia
         fuerza.mu['NG']=max(min(theta.mu['NG'],velocidad.mu['NG']),min(theta.mu['NP'],velocidad.mu['NG']), min(theta.mu['Z'],velocidad.mu['NG']), min(theta.mu['NG'],velocidad.mu['NP']), min(theta.mu['NP'],velocidad.mu['NP']), min(theta.mu['NG'],velocidad.mu['Z']))
         fuerza.mu['NP']=max(min(theta.mu['PP'],velocidad.mu['NG']), min(theta.mu['Z'],velocidad.mu['NP']), min(theta.mu['NP'],velocidad.mu['Z']), min(theta.mu['NG'],velocidad.mu['PP']))
@@ -193,6 +186,11 @@ if __name__ == "__main__":
             den += i
         F= num/den
 
+        ang, vel, acel = simular(theta_ang, v, a, F)
+        
+        y.append(ang)
+        y1.append(vel)
+        y2.append(acel)
 
 
     fig, (ax, ax1, ax2) = plt.subplots(1, 3, figsize=(16, 5))
