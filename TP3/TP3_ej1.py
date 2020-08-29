@@ -13,25 +13,25 @@ def funcionActivacion(valor,opcion):
             return(0)
     
 #Calcular la salida de cada neurona
-def salidaReal(wji,wkj,x,y,output):
+def salidaReal(w1,w2,x,y,output,NEURONAS_CAPA_OCULTA,NEURONAS_ENTRADA,NEURONAS_SALIDA):
     
     #Para la capa oculta
-    for j in range(0,NEURONAS_CAPA_OCULTA):
+    for j in range(NEURONAS_CAPA_OCULTA):
         inputY = 0
-        for i in range(0,NEURONAS_ENTRADA):
-            inputY += wji[i][j]*x[i]
+        for i in range(NEURONAS_ENTRADA):
+            inputY += w1[i][j]*x[i]
         #El sesgo -> se puede considerar un peso sinaptico adicional con un valor de entrada fijo en -1
-        inputY -= wji[NEURONAS_ENTRADA-1][j]
+        inputY -= w1[NEURONAS_ENTRADA-1][j]
         #Valor de salida de la neurona j
         y[j] =funcionActivacion(inputY,0)
         
     #Para la capa de salida
-    for k in range(0, NEURONAS_SALIDA):
+    for k in range(NEURONAS_SALIDA):
         inputZ = 0
-        for j in range(0, NEURONAS_CAPA_OCULTA):
-            inputZ += wkj[j][k] * y[j]
+        for j in range(NEURONAS_CAPA_OCULTA):
+            inputZ += w2[j][k] * y[j]
         # Sesgo de las neuronas de la capa de salida
-        inputZ -= wkj[NEURONAS_CAPA_OCULTA - 1][k]
+        inputZ -= w2[NEURONAS_CAPA_OCULTA - 1][k]
         # inputZ -= 1
         # Valor de salidad de la neurona k
         output[k] = funcionActivacion(inputZ,0)    
