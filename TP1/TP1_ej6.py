@@ -130,7 +130,7 @@ def buscar_el_mejor(poblacion):
 
 def algoritmo_genetico():
     all_PL = crear_lista_picking() #3)
-    n_poblacion = 40 #<-- <-- <-- <-- <-- <--TAMAÑO DE POBLACION
+    n_poblacion = 40 #<-- <-- <-- <-- <-- <--TAMANO DE POBLACION
     poblacion = generar_primer_poblacion(n_poblacion) 
     
     generacion = 0
