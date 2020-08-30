@@ -91,8 +91,7 @@ verificar(line_gas_pressure_appropiate):-   estado(line_gas_pressure_appropiate,
 
 %Rama derecha
 verificar(leakage_fixed_with_wrench):-      estado(leakage_fixed_with_wrench, desconocido), (estado(leakage_at_joint,si),
-                                            writeln('Verificar si se solucionaron las fugas'));
-                                            verificar(leakage_at_joint).
+                                            writeln('Verificar si se solucionaron las fugas')); verificar(leakage_at_joint).
 verificar(leakage_fixed_with_wrench):-      estado(leakage_fixed_with_wrench, si), (estado(leakage_at_joint,si),
                                             writeln('Reportar a Unidad de Inspección Técnica').
 verificar(leakage_fixed_with_wrench):-      estado(leakage_fixed_with_wrench, no), (estado(leakage_at_joint,si),

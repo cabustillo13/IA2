@@ -88,8 +88,8 @@ if __name__ == "__main__":
 
     F=0
     theta_ang=45
-    v=0
-    a=0
+    v=50
+    a=10
     y=[]
     y1=[]
     y2=[]
@@ -137,13 +137,12 @@ if __name__ == "__main__":
     velocidad.center['PP']=PP[2]
     velocidad.center['PG']=PG[2]    
                     
-    theta.calcula_funcion(15,delta_t)
-    velocidad.calcula_funcion(9,delta_t)
+
 
     #Conjunto borroso de Fuerza
     #creacion de Particion Borrosa
     NP = ['NP', conjunto_borroso(-25, -5, -15, x,'NP'), -15]
-    Z = ['Z', conjunto_borroso(-10, 10, 0, x,'Z'), 0]
+    Z = ['Z', conjunto_borroso(-10, 10, 0, x,'Z'), 1]
     PP = ['PP', conjunto_borroso(5, 25, 15, x,'PP'), 15]
     NG = ['NG', conjunto_borroso(-30, -20, 0, x,'NG'), -20]
     PG = ['PG', conjunto_borroso(20, 30, 0, x,'PG'), 20]
@@ -165,11 +164,19 @@ if __name__ == "__main__":
 
     #Vector para guardar cosas para el grafico
    
-    dominio = np.arange(0, 180, delta_t) 
+    dominio = np.arange(0, 5, delta_t) 
     #Aca hacer el for-> ver While y tomar una tolerancia (guardar en un vector base)->primero crear los objetos y despues solo cambiar atributos
     for t in dominio:
         ang, vel, acel = simular(theta_ang, v, a, F)
-        fuerza.calcula_funcion(10,delta_t)         #SE PODRIA BORRAR
+        fuerza.calcula_funcion(F,delta_t)         #SE PODRIA BORRAR
+        theta.calcula_funcion(ang,delta_t)
+        velocidad.calcula_funcion(vel,delta_t)
+                
+        y.append(ang)
+        y1.append(vel)
+        y2.append(acel)
+
+        #FALTA ACTUALIZAR MU
         #Reglas de inferencia
         fuerza.mu['NG']=max(min(theta.mu['NG'],velocidad.mu['NG']),min(theta.mu['NP'],velocidad.mu['NG']), min(theta.mu['Z'],velocidad.mu['NG']), min(theta.mu['NG'],velocidad.mu['NP']), min(theta.mu['NP'],velocidad.mu['NP']), min(theta.mu['NG'],velocidad.mu['Z']))
         fuerza.mu['NP']=max(min(theta.mu['PP'],velocidad.mu['NG']), min(theta.mu['Z'],velocidad.mu['NP']), min(theta.mu['NP'],velocidad.mu['Z']), min(theta.mu['NG'],velocidad.mu['PP']))
@@ -184,40 +191,30 @@ if __name__ == "__main__":
         for index, i in fuerza.mu.items():
             num += i*fuerza.center[index]
             den += i
+        
         F= num/den
 
-        ang, vel, acel = simular(theta_ang, v, a, F)
-        
-        y.append(ang)
-        y1.append(vel)
-        y2.append(acel)
+
+        ang, vel, acel = simular(ang, vel, acel, F)
 
 
     fig, (ax, ax1, ax2) = plt.subplots(1, 3, figsize=(16, 5))
-    ax.plot(x, y)
+    ax.plot(dominio, y)
 
     ax.set(xlabel='time (s)', ylabel='theta', title='Delta t = ' + str(delta_t) + " s")
     ax.grid()
     
-    ax1.plot(x, y1)
+    ax1.plot(dominio, y1)
     ax1.set(xlabel='time (s)', ylabel='rad/s', title='Delta t = ' + str(delta_t) + " s")
     ax1.grid()
 
-    ax2.plot(x, y2)
+    ax2.plot(dominio, y2)
     ax2.set(xlabel='time (s)', ylabel='aceleracion', title='Delta t = ' + str(delta_t) + " s")
     ax2.grid()
     
     plt.show()
 
-    #Hacer una funcion aparte para los plots
-    #    plt.plot(x, NP[1], label="NP")
-    #    plt.plot(x, Z[1], label="Z")
-    #    plt.plot(x, PP[1], label="PP")
-    #    plt.plot(x, PG[1], label="PG")
-    #    plt.plot(x, NG[1], label="NG")
-    #    plt.legend()
-    #    plt.xlabel="Ángulo"
-    #    plt.show()
+
 
 
     
