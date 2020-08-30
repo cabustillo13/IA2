@@ -79,13 +79,13 @@ def calcula_aceleracion(theta, v, F):
     g=9.81
     numerador = g * np.sin(theta) + np.cos(theta) * ((-F - m * l * np.power(v, 2) * np.sin(theta)) / (M + m))
     denominador = l * (4/3 - (m * np.power(np.cos(theta), 2) / (M + m)))
-    return numerador / denominador
+    return (numerador / float (denominador))
 
 if __name__ == "__main__":
     delta_t = 0.1                           #0.001    
     x = np.arange(-90, 90, delta_t)         #Cambiar parámetros, para los conj borrosos hacer igual pero con otro dominio
                                         #en simular cambiar los parametros por variables y poner los iniciales arriba del for
-
+    #Condiciones iniciales
     F=0
     theta_ang=45
     v=50
@@ -109,7 +109,7 @@ if __name__ == "__main__":
     theta.PP=PP[1]
     theta.PG=PG[1]
 
-    #Centro de cada conjunto borroso
+    #Centro de cada conjunto borroso theta
     theta.center['NG']=NG[2]
     theta.center['NP']=NP[2]
     theta.center['Z']=Z[2]
@@ -129,15 +129,13 @@ if __name__ == "__main__":
     velocidad.Z=Z[1]
     velocidad.PP=PP[1]
     velocidad.PG=PG[1]
-    #Centro de cada conjunto borroso
+    #Centro de cada conjunto borroso v. angular
     
     velocidad.center['NG']=NG[2]
     velocidad.center['NP']=NP[2]
     velocidad.center['Z']=Z[2]
     velocidad.center['PP']=PP[2]
     velocidad.center['PG']=PG[2]    
-                    
-
 
     #Conjunto borroso de Fuerza
     #creacion de Particion Borrosa
@@ -154,7 +152,7 @@ if __name__ == "__main__":
     fuerza.Z=Z[1]
     fuerza.PP=PP[1]
     fuerza.PG=PG[1]
-    #Centro de cada conjunto borroso
+    #Centro de cada conjunto borroso Fuerza
     
     fuerza.center['NG']=NG[2]
     fuerza.center['NP']=NP[2]
@@ -165,18 +163,19 @@ if __name__ == "__main__":
     #Vector para guardar cosas para el grafico
    
     dominio = np.arange(0, 5, delta_t) 
+
     #Aca hacer el for-> ver While y tomar una tolerancia (guardar en un vector base)->primero crear los objetos y despues solo cambiar atributos
     for t in dominio:
         ang, vel, acel = simular(theta_ang, v, a, F)
-        fuerza.calcula_funcion(F,delta_t)         #SE PODRIA BORRAR
-        theta.calcula_funcion(ang,delta_t)
-        velocidad.calcula_funcion(vel,delta_t)
-                
+        
         y.append(ang)
         y1.append(vel)
         y2.append(acel)
 
-        #FALTA ACTUALIZAR MU
+        fuerza.calcula_funcion(F,delta_t)         #SE PODRIA BORRAR
+        theta.calcula_funcion(ang,delta_t)
+        velocidad.calcula_funcion(vel,delta_t)
+        
         #Reglas de inferencia
         fuerza.mu['NG']=max(min(theta.mu['NG'],velocidad.mu['NG']),min(theta.mu['NP'],velocidad.mu['NG']), min(theta.mu['Z'],velocidad.mu['NG']), min(theta.mu['NG'],velocidad.mu['NP']), min(theta.mu['NP'],velocidad.mu['NP']), min(theta.mu['NG'],velocidad.mu['Z']))
         fuerza.mu['NP']=max(min(theta.mu['PP'],velocidad.mu['NG']), min(theta.mu['Z'],velocidad.mu['NP']), min(theta.mu['NP'],velocidad.mu['Z']), min(theta.mu['NG'],velocidad.mu['PP']))
@@ -185,17 +184,13 @@ if __name__ == "__main__":
         fuerza.mu['PG']=max(min(theta.mu['PG'],velocidad.mu['Z']), min(theta.mu['PG'],velocidad.mu['PP']), min(theta.mu['PG'],velocidad.mu['PG']), min(theta.mu['PP'],velocidad.mu['PP']), min(theta.mu['PP'],velocidad.mu['PG']), min(theta.mu['Z'],velocidad.mu['PG']))
 
     #OBTENER LA POSICION DE F (DESBORROSIFICAR)->Función aparte
-    #Buscar donde poner el center para los hombros
         num=0
         den=0
         for index, i in fuerza.mu.items():
             num += i*fuerza.center[index]
             den += i
         
-        F= num/den
-
-
-        ang, vel, acel = simular(ang, vel, acel, F)
+        F= (num/float (den))
 
 
     fig, (ax, ax1, ax2) = plt.subplots(1, 3, figsize=(16, 5))
