@@ -1,0 +1,59 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{subcaption}
+\usepackage{mwe}
+\usepackage{listings}
+\usepackage[section]{placeins}
+\usepackage[export]{adjustbox}
+
+\pagestyle{plain}
+\pagenumbering{arabic}
+
+
+\title{Informe del Trabajo Práctico n° 2: Razonamiento}
+
+\author{Agüero, Emanuel\\
+\and
+Bustillo, Carlos\\
+\and
+Lezcano, Agustín\\
+}
+
+\date{29 de agosto de 2020}
+
+\begin{document}
+
+\maketitle
+
+\section{Evaluación y mantenimiento de una válvula de seguridad de una estación de reducción de presión de gas.}
+
+\subsection{Modelo}
+    Para nuestro modelo consideramos la vávula de control que engloba las 3 partes principales: joints, body, pipes y las válvulas de seguridad.
+
+\subsection{Base de conocimiento}
+    Para desarrollar la base de conocimiento nos basamos en el árbol de decisiones presentada en la consigna.
+    
+    Esta se divide en rama izquierda, derecha y central del árbol. Cada sentencia de la base de conocimiento se basan en las hojas del árbol, lo que determinan la acción que se debe realizar al leer los ground facts, las cuales también están relacionadas entre sí. Cabe aclarar que la rama central que presenta ciertas hojas que necesitan de múltiples de condiciones para cumplirse. 
+
+\subsection{Ground Facts}
+    Son los hechos que se dan en una instancia específica del dominio. Contienen toda la información necesaria para recorrer el árbol, basados en cada una de las preguntas del árbol. En este caso son los sensores los que proporcionan la información necesaria. 
+    
+    Cabe recalcar que los Ground Facts se pueden modificar dinámicamente con assert y retract.
+
+\subsection{Preguntas}
+    Son las que se encargan de recorrer el árbol. 
+    
+    Tenemos preguntas abiertas que son sentencias que se encargan de dar información específica sobre cada característica específica de la estación de gas. Por ejemplo: verificar() y safety().
+
+\section{Planning utilizando Fast Downward}
+    
+\subsection{Planificación de transporte aéreo de cargas}
+
+\subsection{Planificación de Procesos Asistida por Computadora (CAPP, Computer-Aided Process Planning). }
+
+Se consideraron las siguientes acciones: montar-pieza, op-torneado, op-taladrado op-fresado y setup-orientacion.
+
+\section{Sistema de Inferencia Difusa para controlar un péndulo invertido}
+
+\end{document}

@@ -1,4 +1,5 @@
 #PARA PYTHON3
+import TP3_ej1
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -98,13 +99,16 @@ def train(x, t, pesos, learning_rate, epochs):
     # Cantidad de filas (i.e. cantidad de ejemplos)
     m = np.size(x, 0) 
     
+    #Para posteriormente graficar Loss
+    graphLoss = list()
+    
     for i in range(epochs):
         # Ejecucion de la red hacia adelante
         resultados_feed_forward = ejecutar_adelante(x, pesos)
         y = resultados_feed_forward["y"]
         h = resultados_feed_forward["h"]
         z = resultados_feed_forward["z"]
-
+        
         # LOSS
         # a. Exponencial de todos los scores
         exp_scores = np.exp(y)
@@ -122,6 +126,7 @@ def train(x, t, pesos, learning_rate, epochs):
         # d. Calculo de la funcion de perdida global. Solo se usa la probabilidad de la clase correcta, 
         #    que tomamos del array t ("target")
         loss = (1 / m) * np.sum( -np.log( p[range(m), t] ))
+        graphLoss.append(loss)
 
         # Mostramos solo cada 1000 epochs
         if i %1000 == 0:
@@ -161,8 +166,18 @@ def train(x, t, pesos, learning_rate, epochs):
         pesos["b1"] = b1
         pesos["w2"] = w2
         pesos["b2"] = b2
-
-
+    
+    #Grafica Loss
+    plt.plot(graphLoss)
+    plt.xlabel("x")
+    plt.ylabel("f")
+    plt.grid(True)
+    plt.title("Calculo de Loss")
+    plt.show()
+    
+    #Devolver y: output de la neurona de salida
+    return y
+    
 def iniciar(numero_clases, numero_ejemplos, graficar_datos):
     # Generamos datos
     x, t = generar_datos_clasificacion(numero_ejemplos, numero_clases)
@@ -181,7 +196,21 @@ def iniciar(numero_clases, numero_ejemplos, graficar_datos):
     # Entrena
     LEARNING_RATE=1
     EPOCHS=10000
-    train(x, t, pesos, LEARNING_RATE, EPOCHS)
+    
+    #Asignar output de la neurona de entrada
+    y = train(x, t, pesos, LEARNING_RATE, EPOCHS)
+    return x,t,y
 
+#############
+## TP3_ej1 ##
+#############
+#Train
+x1, t1, y1 = iniciar(numero_clases=3, numero_ejemplos=300, graficar_datos=True)
 
-iniciar(numero_clases=3, numero_ejemplos=300, graficar_datos=True)
+#Test
+x2 = np.zeros((300, 2))
+pesos2 = inicializar_pesos(2,100,3)
+clasificar(x2,pesos2)
+
+#Accuracy
+
