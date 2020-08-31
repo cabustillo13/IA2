@@ -16,14 +16,16 @@ class Theta:
         self.center={'NG': 0,'NP': 0,'Z': 0,'PP': 0,'PG': 0}
 
 #quiero poner el valor (posicion de cada tita o tita-punto) -> obtener cada mu (para cada particion)
-    def calcula_funcion(self, conjunto, delta_t):
+    def calcula_funcion(self, inicio, conjunto, delta_t):
         self.valor=conjunto
+        #MODIFICAR: el 90 es para un solo dominio, si cambio debo usar mas general
         #valor de la ordenada deseada sumandole 90 que es desde donde empieza el vector y dividiendo por los pasos
-        self.mu['NG'] = self.NG[int((conjunto+90)/delta_t)]
-        self.mu['NP'] = self.NP[int((conjunto+90)/delta_t)]
-        self.mu['Z'] = self.Z[int((conjunto+90)/delta_t)]
-        self.mu['PP'] = self.PP[int((conjunto+90)/delta_t)]
-        self.mu['PG'] = self.PG[int((conjunto+90)/delta_t)]
+        inicio=abs(inicio)
+        self.mu['NG'] = self.NG[int((conjunto+inicio)/delta_t)]
+        self.mu['NP'] = self.NP[int((conjunto+inicio)/delta_t)]
+        self.mu['Z'] = self.Z[int((conjunto+inicio)/delta_t)]
+        self.mu['PP'] = self.PP[int((conjunto+inicio)/delta_t)]
+        self.mu['PG'] = self.PG[int((conjunto+inicio)/delta_t)]
 
 #puede ser un metodo tambien
 def conjunto_borroso(min, max, center, x, tag):
@@ -82,19 +84,20 @@ def calcula_aceleracion(theta, v, F):
     return (numerador / float (denominador))
 
 if __name__ == "__main__":
-    delta_t = 0.1                           #0.001    
-    x = np.arange(-90, 90, delta_t)         #Cambiar parámetros, para los conj borrosos hacer igual pero con otro dominio
+    delta_t = 0.01                           #0.001    
                                         #en simular cambiar los parametros por variables y poner los iniciales arriba del for
     #Condiciones iniciales
     F=0
-    theta_ang=45
-    v=50
-    a=10
+    ang=60
+    vel=-20
+    acel=10
     y=[]
     y1=[]
     y2=[]
 
-
+#Variable:angulo
+    in_theta=-90
+    x = np.arange(in_theta, 90, delta_t)         #Cambiar parámetros, para los conj borrosos hacer igual pero con otro dominio
     #Partición Borrosa de Theta
     NP = ['NP', conjunto_borroso(-25, -5, -15, x,'NP'), -15]
     Z = ['Z', conjunto_borroso(-10, 10, 0, x,'Z'), 0]
@@ -116,12 +119,15 @@ if __name__ == "__main__":
     theta.center['PP']=PP[2]
     theta.center['PG']=PG[2]    
 
+#Variable: velocidad angular
+    in_vel=-300
+    x = np.arange(in_vel, 300, delta_t)        
     #Partición Borrosa de velocidad angular
-    NP = ['NP', conjunto_borroso(-25, -5, -15, x,'NP'), -15]
-    Z = ['Z', conjunto_borroso(-10, 10, 0, x,'Z'), 0]
-    PP = ['PP', conjunto_borroso(5, 25, 15, x,'PP'), 15]
-    NG = ['NG', conjunto_borroso(-30, -20, 0, x,'NG'), -20]
-    PG = ['PG', conjunto_borroso(20, 30, 0, x,'PG'), 20]
+    NG = ['NG', conjunto_borroso(-240, -100, 0, x,'NG'), -100]    
+    NP = ['NP', conjunto_borroso(-200, 0, 100, x,'NP'), -100]
+    Z = ['Z', conjunto_borroso(-100, 100, 0, x,'Z'), 0]
+    PP = ['PP', conjunto_borroso(0, 200, 100, x,'PP'), 100]
+    PG = ['PG', conjunto_borroso(100, 240, 0, x,'PG'), 100]
 
     velocidad = Theta(1)
     velocidad.NG=NG[1]
@@ -162,19 +168,19 @@ if __name__ == "__main__":
 
     #Vector para guardar cosas para el grafico
    
-    dominio = np.arange(0, 5, delta_t) 
+    dominio = np.arange(0, 30, delta_t) 
 
     #Aca hacer el for-> ver While y tomar una tolerancia (guardar en un vector base)->primero crear los objetos y despues solo cambiar atributos
     for t in dominio:
-        ang, vel, acel = simular(theta_ang, v, a, F)
+        ang, vel, acel = simular(ang, vel, acel, F)
         
         y.append(ang)
         y1.append(vel)
         y2.append(acel)
 
-        fuerza.calcula_funcion(F,delta_t)         #SE PODRIA BORRAR
-        theta.calcula_funcion(ang,delta_t)
-        velocidad.calcula_funcion(vel,delta_t)
+        #fuerza.calcula_funcion(F,delta_t)         #SE PODRIA BORRAR
+        theta.calcula_funcion(in_theta,ang,delta_t)
+        velocidad.calcula_funcion(in_vel,vel,delta_t)
         
         #Reglas de inferencia
         fuerza.mu['NG']=max(min(theta.mu['NG'],velocidad.mu['NG']),min(theta.mu['NP'],velocidad.mu['NG']), min(theta.mu['Z'],velocidad.mu['NG']), min(theta.mu['NG'],velocidad.mu['NP']), min(theta.mu['NP'],velocidad.mu['NP']), min(theta.mu['NG'],velocidad.mu['Z']))
@@ -192,6 +198,7 @@ if __name__ == "__main__":
         
         F= (num/float (den))
 
+    print(y)
 
     fig, (ax, ax1, ax2) = plt.subplots(1, 3, figsize=(16, 5))
     ax.plot(dominio, y)
