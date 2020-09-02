@@ -45,15 +45,93 @@ Lezcano, Agustín\\
     Son las que se encargan de recorrer el árbol. 
     
     Tenemos preguntas abiertas que son sentencias que se encargan de dar información específica sobre cada característica específica de la estación de gas. Por ejemplo: verificar() y safety().
+    
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{TP2_ej1.png}
+    \caption{Ejecución por terminal del programa en Prolog}
+    \label{fig:TP2_ej1}
+\end{figure}
 
 \section{Planning utilizando Fast Downward}
     
 \subsection{Planificación de transporte aéreo de cargas}
 
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{TP2_ej2a.png}
+    \caption{Plan obtenido}
+    \label{fig:TP2_ej2a}
+\end{figure}
+
+Un aspecto a recalcar para este ejercicio es que el planificador considera como importante solo la cantidad de acciones y no el tiempo que se demoren para ser ejecutadas. También se pueden presentar planes absurdos como por ejemplo: un avión tiene que llevar dos cargas y para evitar que vaya de A -> B lleve una carga, luego vuelva de B -> A suba la otra carga, y después vuelva a llevarla de A -> B se puede utilizar el costo de las acciones.
+
 \subsection{Planificación de Procesos Asistida por Computadora (CAPP, Computer-Aided Process Planning). }
 
-Se consideraron las siguientes acciones: montar-pieza, op-torneado, op-taladrado op-fresado y setup-orientacion.
+Se consideraron las siguientes acciones: cambio-herramienta, rotacion-pieza, agujerear y fresar.
+
+Estas acciones quedaron representadas de manera simplificada por falta de información adicional, por ejemplo se representa por un solo número en vez de plantearse como un punto en el plano o espacio.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{TP2_ej2b.png}
+    \caption{Plan obtenido}
+    \label{fig:TP2_ej2b}
+\end{figure}
 
 \section{Sistema de Inferencia Difusa para controlar un péndulo invertido}
+
+\subsection{Variables lingüísticas de entrada y salida}
+
+Para las condiciones iniciales tuvimos en cuenta los valores propios del modelo físico: la masa del carro, masa de la pertiga, longitud de la pertiga, la gravedad, discretización del tiempo (delta t) y los valores iniciales de la posición, velocidad y aceleración.
+
+\subsection{Particiones borrosas}
+
+En la creación de la partición borrosa, se tuvieron en cuenta 5 conjuntos borrosos, para cada uno de los parámetros de entrada (posición angular y velocidad angular) y los de salida (fuerza linear del carro).
+
+\subsection{Operaciones borrosas para la conjunción, disyunción e implicación}
+
+Para este tipo de operaciones realizamos un método llamado conjuto-borroso .
+
+\subsection{Reglas de inferencia}
+
+Fuerza[NG] = maximo[minimo.θ[NG],velocidad[NG],minimo.θ[NP,velocidad[NG],\\minimo.θ[Z], velocidad[NG],minimo.θ[NG], velocidad[NP],minimo.θ[NP], velocidad[NP],\\minimo.θ[NG], velocidad[Z]]\\
+
+Fuerza[NP] = maximo[minimo.θ[PP], velocidad[NG],minimo.θ[Z], velocidad[NP],\\minimo.θ[NP], velocidad[Z],minimo.θ[NG], velocidad[PP]]\\
+
+Fuerza[Z] = maximo[minimo.θ[PG], velocidad[NG],minimo.θ[PP], velocidad[NP],minimo.θ[Z], velocidad[Z],minimo.θ[NP], velocidad[PP],minimo.θ[NG], velocidad[PG]]\\
+
+Fuerza[PP] = maximo[minimo.θ[PG], velocidad[NP],minimo.θ[PP], velocidad[Z],minimo.θ[Z], velocidad[PP],minimo.θ[NP], velocidad[PG]]\\
+
+Fuerza[PG] = maximo[minimo.θ[PG], velocidad[Z],minimo.θ[PG], velocidad[PP],\\minimo.θ[PG], velocidad[PG],minimo.θ[PP], velocidad[PP],minimo.θ[PP], velocidad[PG],minimo.θ[Z], velocidad[PG]]\\
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{TP2_ej3_0.png}
+    \caption{Vibración forzada con delta_t=0.01 s}
+    \label{fig:TP2_ej3_0}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{TP2_ej3_1.png}
+    \caption{Vibración libre con delta_t=0.01 s}
+    \label{fig:TP2_ej3_1}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{TP2_ej3_2.png}
+    \caption{Plan Vibración forzada con delta_t=0.001 s}
+    \label{fig:TP2_ej3_2}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{TP2_ej3_3.png}
+    \caption{Vibración libre con delta_t=0.001 s}
+    \label{fig:TP2_ej3_3}
+\end{figure}
+
 
 \end{document}
