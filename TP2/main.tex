@@ -34,7 +34,7 @@ Lezcano, Agustín\\
 \subsection{Base de conocimiento}
     Para desarrollar la base de conocimiento nos basamos en el árbol de decisiones presentada en la consigna.
     
-    Esta se divide en rama izquierda, derecha y central del árbol. Cada sentencia de la base de conocimiento se basan en las hojas del árbol, lo que determinan la acción que se debe realizar al leer los ground facts, las cuales también están relacionadas entre sí. Cabe aclarar que la rama central que presenta ciertas hojas que necesitan de múltiples de condiciones para cumplirse. 
+    Esta se divide en rama izquierda, derecha y central del árbol. Cada sentencia de la base de conocimiento se basan en las hojas del árbol, lo que determinan la acción que se debe realizar al leer los \textit{ground facts}, los cuales también están relacionadas entre sí. Cabe aclarar que la rama central que presenta ciertas hojas que necesitan de múltiples de condiciones para cumplirse. 
 
 \subsection{Ground Facts}
     Son los hechos que se dan en una instancia específica del dominio. Contienen toda la información necesaria para recorrer el árbol, basados en cada una de las preguntas del árbol. En este caso son los sensores los que proporcionan la información necesaria. 
@@ -64,13 +64,29 @@ Lezcano, Agustín\\
     \label{fig:TP2_ej2a}
 \end{figure}
 
-Un aspecto a recalcar para este ejercicio es que el planificador considera como importante solo la cantidad de acciones y no el tiempo que se demoren para ser ejecutadas. También se pueden presentar planes absurdos como por ejemplo: un avión tiene que llevar dos cargas y para evitar que vaya de A -> B lleve una carga, luego vuelva de B -> A suba la otra carga, y después vuelva a llevarla de A -> B se puede utilizar el costo de las acciones.
+Un aspecto a recalcar para este ejercicio es que el planificador considera como importante solo la cantidad de acciones y no el tiempo que se demoren para ser ejecutadas. También se pueden presentar planes absurdos como por ejemplo: un avión tiene que llevar dos cargas y para evitar que vaya de $A \rightarrow B$ lleve una carga, luego vuelva de $B \rightarrow A$ suba la otra carga, y después vuelva a llevarla de $A \rightarrow B$ se puede utilizar el costo de las acciones.
+
+Se implementó un costo variable para las distintas acciones, de forma que la carga y descarga tengan un costo unitario, mientras que volar de un aeropuerto a otro costará la distancia entre los dos aeropuertos de salida y de llegada. Para esto, se utilizaron datos reales y para llegar a un valor aceptable de costo, se dividió la distancia (en km) por 300 y se redondeó al entero.
+
+Lo interesante es que uno de los objetivos asignados al problema es que la carga de electrónica esté en el aeropuerto de Córdoba (COR), para esto se lo debe cargar desde Río Negro (IGB) y descargar en Córdoba, pero el problema radica en que no hay ningún avión inicialmente en Río Negro. Se encontró una solución a este problema, volando primero un avión hacia Río Negro, tal como se observa en la Figura \ref{fig:TP2_ej2a}. 
 
 \subsection{Planificación de Procesos Asistida por Computadora (CAPP, Computer-Aided Process Planning). }
 
-Se consideraron las siguientes acciones: cambio-herramienta, rotacion-pieza, agujerear y fresar.
+Se consideraron las siguientes acciones: cambio-herramienta, rotacion-pieza, tornear, taladrar y fresar.
 
-Estas acciones quedaron representadas de manera simplificada por falta de información adicional, por ejemplo se representa por un solo número en vez de plantearse como un punto en el plano o espacio.
+Para alcanzar el objetivo de realizar la totalidad de las \textit{features} que deben maquinarse se definió que cada feature es fabricable con una determinada máquina-herramienta y a la vez la pieza debe ser montada en una determinada posición en ésta, haciendo uso de variables \textit{x\_p}, \textit{x\_n}, \textit{y\_p}, \textit{y\_n}, \textit{z\_p}, \textit{z\_n} que corresponden a la dirección en x,y,z positiva (p) o negativa (n). 
+
+Se implementó un costo variable para cada una de las operaciones de la siguiente manera:
+
+\begin{itemize}
+    \item Costo 1: fresado, taladrado, torneado
+    \item Costo 2: rotar pieza
+    \item Costo 3: montar pieza en máquina-herramiento
+\end{itemize}
+
+De esta forma, es óptimo realizar todas las operaciones con una determinada máquina-herramienta y rotar la pieza en ésta que con ir intercambiando entre una máquina-herramienta y otra, tal como puede observarse en la Figura \ref{fig:TP2_ej2b}.
+
+Para futuras implementaciones, podría considerarse crear un sistema que realice determinadas operaciones sólo si antes se maquinó una feature en específico.
 
 \begin{figure}[ht]
     \centering
@@ -85,6 +101,15 @@ Estas acciones quedaron representadas de manera simplificada por falta de inform
 
 Para las condiciones iniciales tuvimos en cuenta los valores propios del modelo físico: la masa del carro, masa de la pertiga, longitud de la pertiga, la gravedad, discretización del tiempo (delta t) y los valores iniciales de la posición, velocidad y aceleración.
 
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{index.jpeg}
+    \caption{Partición borrosa de posición angular}
+    \label{fig:TP2_ej2b}
+\end{figure}
+
+
+
 \subsection{Particiones borrosas}
 
 En la creación de la partición borrosa, se tuvieron en cuenta 5 conjuntos borrosos, para cada uno de los parámetros de entrada (posición angular y velocidad angular) y los de salida (fuerza linear del carro).
@@ -94,6 +119,13 @@ En la creación de la partición borrosa, se tuvieron en cuenta 5 conjuntos borr
 Para este tipo de operaciones realizamos un método llamado conjuto-borroso .
 
 \subsection{Reglas de inferencia}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{tabla_final.png}
+    \caption{Cuadro de Mandami}
+    \label{fig:tabla_final}
+\end{figure}
 
 Fuerza[NG] = maximo[minimo.θ[NG],velocidad[NG],minimo.θ[NP,velocidad[NG],\\minimo.θ[Z], velocidad[NG],minimo.θ[NG], velocidad[NP],minimo.θ[NP], velocidad[NP],\\minimo.θ[NG], velocidad[Z]]\\
 
