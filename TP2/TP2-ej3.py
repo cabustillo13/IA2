@@ -193,11 +193,14 @@ if __name__ == "__main__":
     #    ang0, vel0, acel0= simular (delta_t,(theta_0), v_0, 0, 0)
         
 <<<<<<< HEAD
+<<<<<<< HEAD
        
         
 =======
         ang0, vel0, acel0= simular (ang0, vel0, 0, 0)
 >>>>>>> 2d522e43b72a8af1c6d8c965936bbecfd8d75e9b
+=======
+>>>>>>> bfc3e267e5f5d00c39615c9554856440f067e940
         acel0 = calcula_aceleracion(ang0, vel0, 0)
         vel0 = vel0 + acel0 * delta_t
         ang0 = ang0 + vel0 * delta_t + acel0 * np.power(delta_t, 2) / 2
