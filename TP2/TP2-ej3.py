@@ -79,7 +79,7 @@ def calcula_aceleracion(theta, v, F):
     m = 1 # Masa de la pertiga
     l = 1 # Longitud de la pertiga
     g=9.81
-    numerador = g * np.sin(theta) + np.cos(theta) * ((-F - m * l * np.power(v, 2) * np.sin(theta)) / (M + m))
+    numerador = g * np.sin(theta) + np.cos(theta) * ((F - m * l * np.power(v, 2) * np.sin(theta)) / (M + m))
     denominador = l * (4/3 - (m * np.power(np.cos(theta), 2) / (M + m)))
     return (numerador / float (denominador))
 
@@ -169,8 +169,8 @@ if __name__ == "__main__":
     #Vector para guardar cosas para el grafico
    
     dominio = np.arange(0, 30, delta_t) 
-    theta_0 = 45
-    v_0=0
+    ang0 = 45
+    vel0 = 0
     z=list()
     z1=list()
     z2=list()
@@ -178,7 +178,7 @@ if __name__ == "__main__":
     for t in dominio:
         ang, vel, acel = simular(ang, vel, acel, F)
         
-        ang0, vel0, acel0= simular (theta_0, v_0, 0, 0)
+        ang0, vel0, acel0= simular (ang0, vel0, 0, 0)
         acel0 = calcula_aceleracion(ang0, vel0, 0)
         vel0 = vel0 + acel0 * delta_t
         ang0 = ang0 + vel0 * delta_t + acel0 * np.power(delta_t, 2) / 2
