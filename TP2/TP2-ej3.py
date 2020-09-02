@@ -188,15 +188,9 @@ if __name__ == "__main__":
     #Aca hacer el for-> ver While y tomar una tolerancia (guardar en un vector base)->primero crear los objetos y despues solo cambiar atributos
     for t in dominio:
     #    ang0, vel0, acel0= simular (delta_t,(theta_0), v_0, 0, 0)
-        
-<<<<<<< HEAD
-<<<<<<< HEAD
-       
-        
-=======
+
         ang0, vel0, acel0= simular (ang0, vel0, 0, 0)
-=======
->>>>>>> bfc3e267e5f5d00c39615c9554856440f067e940
+
         acel0 = calcula_aceleracion(ang0, vel0, 0)
         vel0 = vel0 + acel0 * delta_t
         ang0 = ang0 + vel0 * delta_t + acel0 * np.power(delta_t, 2) / 2
@@ -204,7 +198,7 @@ if __name__ == "__main__":
         z.append(ang0)
         z1.append(vel0)
         z2.append(acel0) 
-<<<<<<< HEAD
+
         
     #    ang, vel, acel = simular(delta_t, ang, vel, acel, F)
         
@@ -213,8 +207,6 @@ if __name__ == "__main__":
         acel = calcula_aceleracion(ang, vel, F)
         vel = vel + acel * delta_t
         ang = ang + vel * delta_t + acel * np.power(delta_t, 2) / 2
-    
-=======
 
         y.append(ang)
         y1.append(vel)
@@ -238,15 +230,13 @@ if __name__ == "__main__":
             num += i*fuerza.center[index]
             den += i
         
-<<<<<<< HEAD
         F= (num/float (den))
     #    delta_t+=delta_t
 
     fig0 = plt.figure(1)
     plt.plot(dominio, z) 
     #fig0.set(title='Vibraciones libres')
-=======
-        F= (float)(num/den)
+    #F= (float)(num/den)
 
 
     fig, (ax, ax1, ax2) = plt.subplots(1, 3, figsize=(16, 5))
