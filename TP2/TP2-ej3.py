@@ -59,17 +59,17 @@ def conjunto_borroso(min, max, center, x, tag):
             y.append(z)
     return(y)
 
-def simular(theta_0, v_0, a_0, F):
+#def simular(delta_t, theta_0, v_0, a_0, F):
    
-    theta = (theta_0 * np.pi) / 180
-    v = v_0
-    a = a_0
+#    theta = (theta_0 * np.pi) / 180
+#    v = v_0
+#    a = a_0
 
-    a = calcula_aceleracion(theta, v, F)
-    v = v + a * delta_t
-    theta = theta + v * delta_t + a * np.power(delta_t, 2) / 2
+#    a = calcula_aceleracion(theta, v, F)
+#    v = v + a * delta_t
+#    theta = theta + v * delta_t + a * np.power(delta_t, 2) / 2
 
-    return theta, v, a
+#    return theta, v, a
     
 # Calcula la aceleracion en el siguiente instante de tiempo dado el angulo y la velocidad angular actual, y la fuerza ejercida
 def calcula_aceleracion(theta, v, F):
@@ -79,30 +79,41 @@ def calcula_aceleracion(theta, v, F):
     m = 1 # Masa de la pertiga
     l = 1 # Longitud de la pertiga
     g=9.81
-    numerador = g * np.sin(theta) + np.cos(theta) * ((-F - m * l * np.power(v, 2) * np.sin(theta)) / (M + m))
+    #CAMBIE EL SIGNO DE F
+    numerador = g * np.sin(theta) + np.cos(theta) * ((F - m * l * np.power(v, 2) * np.sin(theta)) / (M + m))
     denominador = l * (4/3 - (m * np.power(np.cos(theta), 2) / (M + m)))
     return (numerador / float (denominador))
 
 if __name__ == "__main__":
     delta_t = 0.01                           #0.001    
-                                        #en simular cambiar los parametros por variables y poner los iniciales arriba del for
     #Condiciones iniciales
     F=0
-    ang=60
+    angulo=60
     vel=-20
     acel=10
+    
+    
+    ang = (angulo * np.pi) / 180
+
+    ang0=ang
+    vel0=vel
+    acel0=acel
+
     y=[]
     y1=[]
     y2=[]
 
+    z=[]
+    z1=[]
+    z2=[]
 #Variable:angulo
     in_theta=-90
     x = np.arange(in_theta, 90, delta_t)         #Cambiar parámetros, para los conj borrosos hacer igual pero con otro dominio
     #Partición Borrosa de Theta
-    NP = ['NP', conjunto_borroso(-25, -5, -15, x,'NP'), -15]
-    Z = ['Z', conjunto_borroso(-10, 10, 0, x,'Z'), 0]
-    PP = ['PP', conjunto_borroso(5, 25, 15, x,'PP'), 15]
     NG = ['NG', conjunto_borroso(-30, -20, 0, x,'NG'), -20]
+    NP = ['NP', conjunto_borroso(-30, 0, -20, x,'NP'), -20]
+    Z = ['Z', conjunto_borroso(-20, 20, 0, x,'Z'), 0]
+    PP = ['PP', conjunto_borroso(0, 30, 20, x,'PP'), 20]
     PG = ['PG', conjunto_borroso(20, 30, 0, x,'PG'), 20]
 
     theta = Theta(1)
@@ -172,12 +183,30 @@ if __name__ == "__main__":
 
     #Aca hacer el for-> ver While y tomar una tolerancia (guardar en un vector base)->primero crear los objetos y despues solo cambiar atributos
     for t in dominio:
-        ang, vel, acel = simular(ang, vel, acel, F)
+    #    ang0, vel0, acel0= simular (delta_t,(theta_0), v_0, 0, 0)
         
+       
+        
+        acel0 = calcula_aceleracion(ang0, vel0, 0)
+        vel0 = vel0 + acel0 * delta_t
+        ang0 = ang0 + vel0 * delta_t + acel0 * np.power(delta_t, 2) / 2
+
+        z.append(ang0)
+        z1.append(vel0)
+        z2.append(acel0) 
+        
+    #    ang, vel, acel = simular(delta_t, ang, vel, acel, F)
+        
+
+
+        acel = calcula_aceleracion(ang, vel, F)
+        vel = vel + acel * delta_t
+        ang = ang + vel * delta_t + acel * np.power(delta_t, 2) / 2
+    
         y.append(ang)
         y1.append(vel)
-        y2.append(acel)
-
+        y2.append(acel)        
+        
         #fuerza.calcula_funcion(F,delta_t)         #SE PODRIA BORRAR
         theta.calcula_funcion(in_theta,ang,delta_t)
         velocidad.calcula_funcion(in_vel,vel,delta_t)
@@ -197,8 +226,11 @@ if __name__ == "__main__":
             den += i
         
         F= (num/float (den))
+    #    delta_t+=delta_t
 
-    print(y)
+    fig0 = plt.figure(1)
+    plt.plot(dominio, z) 
+    #fig0.set(title='Vibraciones libres')
 
     fig, (ax, ax1, ax2) = plt.subplots(1, 3, figsize=(16, 5))
     ax.plot(dominio, y)
