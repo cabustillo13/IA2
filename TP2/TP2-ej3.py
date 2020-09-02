@@ -79,7 +79,10 @@ def calcula_aceleracion(theta, v, F):
     m = 1 # Masa de la pertiga
     l = 1 # Longitud de la pertiga
     g=9.81
+<<<<<<< HEAD
     #CAMBIE EL SIGNO DE F
+=======
+>>>>>>> 2d522e43b72a8af1c6d8c965936bbecfd8d75e9b
     numerador = g * np.sin(theta) + np.cos(theta) * ((F - m * l * np.power(v, 2) * np.sin(theta)) / (M + m))
     denominador = l * (4/3 - (m * np.power(np.cos(theta), 2) / (M + m)))
     return (numerador / float (denominador))
@@ -156,11 +159,11 @@ if __name__ == "__main__":
 
     #Conjunto borroso de Fuerza
     #creacion de Particion Borrosa
-    NP = ['NP', conjunto_borroso(-25, -5, -15, x,'NP'), -15]
-    Z = ['Z', conjunto_borroso(-10, 10, 0, x,'Z'), 1]
-    PP = ['PP', conjunto_borroso(5, 25, 15, x,'PP'), 15]
-    NG = ['NG', conjunto_borroso(-30, -20, 0, x,'NG'), -20]
-    PG = ['PG', conjunto_borroso(20, 30, 0, x,'PG'), 20]
+    NP = ['NP', conjunto_borroso(-250, -200, -150, x,'NP'), -200]
+    Z = ['Z', conjunto_borroso(-100, 100, 0, x,'Z'), 0]
+    PP = ['PP', conjunto_borroso(50, 100, 150, x,'PP'), 100]
+    NG = ['NG', conjunto_borroso(-300, -200, 0, x,'NG'), -200]
+    PG = ['PG', conjunto_borroso(200, 300, 0, x,'PG'), 200]
     
     fuerza= Theta(1)
 
@@ -180,13 +183,21 @@ if __name__ == "__main__":
     #Vector para guardar cosas para el grafico
    
     dominio = np.arange(0, 30, delta_t) 
-
+    ang0 = 45
+    vel0 = 0
+    z=list()
+    z1=list()
+    z2=list()
     #Aca hacer el for-> ver While y tomar una tolerancia (guardar en un vector base)->primero crear los objetos y despues solo cambiar atributos
     for t in dominio:
     #    ang0, vel0, acel0= simular (delta_t,(theta_0), v_0, 0, 0)
         
+<<<<<<< HEAD
        
         
+=======
+        ang0, vel0, acel0= simular (ang0, vel0, 0, 0)
+>>>>>>> 2d522e43b72a8af1c6d8c965936bbecfd8d75e9b
         acel0 = calcula_aceleracion(ang0, vel0, 0)
         vel0 = vel0 + acel0 * delta_t
         ang0 = ang0 + vel0 * delta_t + acel0 * np.power(delta_t, 2) / 2
@@ -194,6 +205,7 @@ if __name__ == "__main__":
         z.append(ang0)
         z1.append(vel0)
         z2.append(acel0) 
+<<<<<<< HEAD
         
     #    ang, vel, acel = simular(delta_t, ang, vel, acel, F)
         
@@ -203,6 +215,9 @@ if __name__ == "__main__":
         vel = vel + acel * delta_t
         ang = ang + vel * delta_t + acel * np.power(delta_t, 2) / 2
     
+=======
+
+>>>>>>> 2d522e43b72a8af1c6d8c965936bbecfd8d75e9b
         y.append(ang)
         y1.append(vel)
         y2.append(acel)        
@@ -225,24 +240,40 @@ if __name__ == "__main__":
             num += i*fuerza.center[index]
             den += i
         
+<<<<<<< HEAD
         F= (num/float (den))
     #    delta_t+=delta_t
 
     fig0 = plt.figure(1)
     plt.plot(dominio, z) 
     #fig0.set(title='Vibraciones libres')
+=======
+        F= (float)(num/den)
+
+    #print(y)
+>>>>>>> 2d522e43b72a8af1c6d8c965936bbecfd8d75e9b
 
     fig, (ax, ax1, ax2) = plt.subplots(1, 3, figsize=(16, 5))
     ax.plot(dominio, y)
-
     ax.set(xlabel='time (s)', ylabel='theta', title='Delta t = ' + str(delta_t) + " s")
     ax.grid()
-    
     ax1.plot(dominio, y1)
     ax1.set(xlabel='time (s)', ylabel='rad/s', title='Delta t = ' + str(delta_t) + " s")
     ax1.grid()
-
     ax2.plot(dominio, y2)
+    ax2.set(xlabel='time (s)', ylabel='aceleracion', title='Delta t = ' + str(delta_t) + " s")
+    ax2.grid()
+    plt.show()
+
+    #ploteo de vib libres
+    fig, (ax, ax1, ax2) = plt.subplots(1, 3, figsize=(16, 5))
+    ax.plot(dominio, z)
+    ax.set(xlabel='time (s)', ylabel='theta', title='Delta t = ' + str(delta_t) + " s")
+    ax.grid() 
+    ax1.plot(dominio, z1)
+    ax1.set(xlabel='time (s)', ylabel='rad/s', title='Delta t = ' + str(delta_t) + " s")
+    ax1.grid()
+    ax2.plot(dominio, z2)
     ax2.set(xlabel='time (s)', ylabel='aceleracion', title='Delta t = ' + str(delta_t) + " s")
     ax2.grid()
     
