@@ -79,10 +79,7 @@ def calcula_aceleracion(theta, v, F):
     m = 1 # Masa de la pertiga
     l = 1 # Longitud de la pertiga
     g=9.81
-<<<<<<< HEAD
     #CAMBIE EL SIGNO DE F
-=======
->>>>>>> 2d522e43b72a8af1c6d8c965936bbecfd8d75e9b
     numerador = g * np.sin(theta) + np.cos(theta) * ((F - m * l * np.power(v, 2) * np.sin(theta)) / (M + m))
     denominador = l * (4/3 - (m * np.power(np.cos(theta), 2) / (M + m)))
     return (numerador / float (denominador))
@@ -198,7 +195,6 @@ if __name__ == "__main__":
         
 =======
         ang0, vel0, acel0= simular (ang0, vel0, 0, 0)
->>>>>>> 2d522e43b72a8af1c6d8c965936bbecfd8d75e9b
 =======
 >>>>>>> bfc3e267e5f5d00c39615c9554856440f067e940
         acel0 = calcula_aceleracion(ang0, vel0, 0)
@@ -220,7 +216,6 @@ if __name__ == "__main__":
     
 =======
 
->>>>>>> 2d522e43b72a8af1c6d8c965936bbecfd8d75e9b
         y.append(ang)
         y1.append(vel)
         y2.append(acel)        
@@ -253,8 +248,6 @@ if __name__ == "__main__":
 =======
         F= (float)(num/den)
 
-    #print(y)
->>>>>>> 2d522e43b72a8af1c6d8c965936bbecfd8d75e9b
 
     fig, (ax, ax1, ax2) = plt.subplots(1, 3, figsize=(16, 5))
     ax.plot(dominio, y)
