@@ -178,7 +178,6 @@ if __name__ == "__main__":
     for t in dominio:
         ang, vel, acel = simular(ang, vel, acel, F)
         
-        ang0, vel0, acel0= simular (ang0, vel0, 0, 0)
         acel0 = calcula_aceleracion(ang0, vel0, 0)
         vel0 = vel0 + acel0 * delta_t
         ang0 = ang0 + vel0 * delta_t + acel0 * np.power(delta_t, 2) / 2
