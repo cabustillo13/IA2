@@ -10,46 +10,44 @@ import matplotlib.pyplot as plt
 def generar_datos_clasificacion(cantidad_ejemplos, cantidad_clases):
     FACTOR_ANGULO = 0.79
     AMPLITUD_ALEATORIEDAD = 0.1
-
-    # Calculamos la cantidad de puntos por cada clase, asumiendo la misma cantidad para cada 
-    # una (clases balanceadas)
     n = int(cantidad_ejemplos / cantidad_clases)
-
-    # Entradas: 2 columnas (x1 y x2)
     x = np.zeros((cantidad_ejemplos, 2))
-    # Salida deseada ("target"): 1 columna que contendra la clase correspondiente (codificada como un entero)
-    t = np.zeros(cantidad_ejemplos, dtype="uint8")  # 1 columna: la clase correspondiente (t -> "target")
-
+    t = np.zeros(cantidad_ejemplos, dtype="uint8")  
     randomgen = np.random.default_rng()
 
-    # Por cada clase (que va de 0 a cantidad_clases)...
     for clase in range(cantidad_clases):
-        # Tomando la ecuacion parametrica del circulo (x = r * cos(t), y = r * sin(t)), generamos 
-        # radios distribuidos uniformemente entre 0 y 1 para la clase actual, y agregamos un poco de
-        # aleatoriedad
         radios = np.linspace(0, 1, n) + AMPLITUD_ALEATORIEDAD * randomgen.standard_normal(size=n)
-
-        # ... y angulos distribuidos tambien uniformemente, con un desfasaje por cada clase
         angulos = np.linspace(clase * np.pi * FACTOR_ANGULO, (clase + 1) * np.pi * FACTOR_ANGULO, n)
-
-        # Generamos un rango con los subindices de cada punto de esta clase. Este rango se va
-        # desplazando para cada clase: para la primera clase los indices estan en [0, n-1], para
-        # la segunda clase estan en [n, (2 * n) - 1], etc.
         indices = range(clase * n, (clase + 1) * n)
-
-        # Generamos las "entradas", los valores de las variables independientes. Las variables:
-        # radios, angulos e indices tienen n elementos cada una, por lo que le estamos agregando
-        # tambien n elementos a la variable x (que incorpora ambas entradas, x1 y x2)
         x1 = radios * np.sin(angulos)
         x2 = radios * np.cos(angulos)
         x[indices] = np.c_[x1, x2]
-
-        # Guardamos el valor de la clase que le vamos a asociar a las entradas x1 y x2 que acabamos
-        # de generar
         t[indices] = clase
 
     return x, t
 
+def generar_nuevos_datos(cantidad_ejemplos, cantidad_clases):
+    x = np.zeros((cantidad_ejemplos, 2))
+    t = np.zeros(cantidad_ejemplos, dtype="uint8")  
+
+    k = [-0.4, 0, 0.4]  #corrimiento horizontal de las curvas
+    output_range = [] #lista dinamica desde 0 a la cantidad de clases -1
+    r1 = 0 
+    while(r1 < cantidad_clases): 
+        output_range.append(r1) 
+        r1 += 1
+
+    count = 0
+    for i in range(cantidad_ejemplos):
+        x[i][0] = np.random.uniform(-1,1)        #x
+        #t[i] = np.random.choice(output_range)           
+        if i >= (int)(cantidad_ejemplos/cantidad_clases)*(count+1):
+            count += 1 
+        t[i] = count
+        c2 = k[t[i]]
+        x[i][1] = 1/(1+np.exp(-10*(x[i][0]-c2)))  #y
+
+    return x, t
 
 def inicializar_pesos(n_entrada, n_capa_2, n_capa_3):
     randomgen = np.random.default_rng()
@@ -62,20 +60,15 @@ def inicializar_pesos(n_entrada, n_capa_2, n_capa_3):
 
     return {"w1": w1, "b1": b1, "w2": w2, "b2": b2}
 
-
 def ejecutar_adelante(x, pesos):
     # Funcion de entrada (a.k.a. "regla de propagacion") para la primera capa oculta
     z = x.dot(pesos["w1"]) + pesos["b1"]
-
     # Funcion de activacion ReLU para la capa oculta (h -> "hidden")
     h = np.maximum(0, z)
-
     # Salida de la red (funcion de activacion lineal). Esto incluye la salida de todas
     # las neuronas y para todos los ejemplos proporcionados
     y = h.dot(pesos["w2"]) + pesos["b2"]
-
     return {"z": z, "h": h, "y": y}
-
 
 def clasificar(x, pesos):
     # Corremos la red "hacia adelante"
@@ -98,41 +91,25 @@ def clasificar(x, pesos):
 def train(x, t, pesos, learning_rate, epochs):
     # Cantidad de filas (i.e. cantidad de ejemplos)
     m = np.size(x, 0) 
-    
-    #Para posteriormente graficar Loss
-    graphLoss = list()
-    
+    loss_list = list()
+    epochs_list = list()
+
     for i in range(epochs):
-        # Ejecucion de la red hacia adelante
         resultados_feed_forward = ejecutar_adelante(x, pesos)
         y = resultados_feed_forward["y"]
         h = resultados_feed_forward["h"]
         z = resultados_feed_forward["z"]
-        
-        # LOSS
-        # a. Exponencial de todos los scores
+
         exp_scores = np.exp(y)
-
-        # b. Suma de todos los exponenciales de los scores, fila por fila (ejemplo por ejemplo).
-        #    Mantenemos las dimensiones (indicamos a NumPy que mantenga la segunda dimension del
-        #    arreglo, aunque sea una sola columna, para permitir el broadcast correcto en operaciones
-        #    subsiguientes)
         sum_exp_scores = np.sum(exp_scores, axis=1, keepdims=True)
-
-        # c. "Probabilidades": normalizacion de las exponenciales del score de cada clase (dividiendo por 
-        #    la suma de exponenciales de todos los scores), fila por fila
         p = exp_scores / sum_exp_scores
-
-        # d. Calculo de la funcion de perdida global. Solo se usa la probabilidad de la clase correcta, 
-        #    que tomamos del array t ("target")
         loss = (1 / m) * np.sum( -np.log( p[range(m), t] ))
-        graphLoss.append(loss)
-
-        # Mostramos solo cada 1000 epochs
+        
         if i %1000 == 0:
             print("Loss epoch", i, ":", loss)
+            loss_list.append(loss)
+            epochs_list.append(i)
 
-        # Extraemos los pesos a variables locales
         w1 = pesos["w1"]
         b1 = pesos["b1"]
         w2 = pesos["w2"]
@@ -154,63 +131,57 @@ def train(x, t, pesos, learning_rate, epochs):
         dL_dw1 = x.T.dot(dL_dz)                         # Ajuste para w1
         dL_db1 = np.sum(dL_dz, axis=0, keepdims=True)   # Ajuste para b1
 
-        # Aplicamos el ajuste a los pesos
-        w1 += -learning_rate * dL_dw1
+        w1 += -learning_rate * dL_dw1 #Ajuste de pesos
         b1 += -learning_rate * dL_db1
         w2 += -learning_rate * dL_dw2
         b2 += -learning_rate * dL_db2
 
-        # Actualizamos la estructura de pesos
-        # Extraemos los pesos a variables locales
-        pesos["w1"] = w1
+        pesos["w1"] = w1 #Extraccion de pesos como variables locales
         pesos["b1"] = b1
         pesos["w2"] = w2
         pesos["b2"] = b2
-    
-    #Grafica Loss
-    plt.plot(graphLoss)
-    plt.xlabel("x")
-    plt.ylabel("f")
-    plt.grid(True)
-    plt.title("Calculo de Loss")
-    plt.show()
-    
-    #Devolver y: output de la neurona de salida
-    return y
-    
-def iniciar(numero_clases, numero_ejemplos, graficar_datos):
-    # Generamos datos
-    x, t = generar_datos_clasificacion(numero_ejemplos, numero_clases)
 
-    # Graficamos los datos si es necesario
+    predicted_class = np.argmax(y, axis=1)
+    print('Precision de entrenamiento: %.2f' % (np.mean(predicted_class == t)))
+    
+    fig, ax = plt.subplots()
+    ax.plot(epochs_list, loss_list)
+    ax.set(xlabel='Epochs', ylabel='Loss')
+    ax.grid()
+    plt.show()
+
+def iniciar(numero_clases, numero_ejemplos, graficar_datos):
+    x, t = generar_datos_clasificacion(numero_ejemplos, numero_clases)
+    x2, t2 = generar_nuevos_datos(numero_ejemplos, numero_clases)
+
     if graficar_datos:
-        # Parametro: "c": color (un color distinto para cada clase en t)
         plt.scatter(x[:, 0], x[:, 1], c=t)
         plt.show()
 
-    # Inicializa pesos de la red
+        plt.scatter(x2[:, 0], x2[:, 1], c=t)
+        plt.show()
+
     NEURONAS_CAPA_OCULTA = 100
     NEURONAS_ENTRADA = 2
     pesos = inicializar_pesos(n_entrada=NEURONAS_ENTRADA, n_capa_2=NEURONAS_CAPA_OCULTA, n_capa_3=numero_clases)
 
-    # Entrena
     LEARNING_RATE=1
     EPOCHS=10000
-    
-    #Asignar output de la neurona de entrada
-    y = train(x, t, pesos, LEARNING_RATE, EPOCHS)
-    return x,t,y
+    #train(x, t, pesos, LEARNING_RATE, EPOCHS)
+    train(x2,t2,pesos,LEARNING_RATE,EPOCHS)
+
+iniciar(numero_clases=3, numero_ejemplos=300, graficar_datos=True)
 
 #############
 ## TP3_ej1 ##
 #############
 #Train
-x1, t1, y1 = iniciar(numero_clases=3, numero_ejemplos=300, graficar_datos=True)
+# x1, t1, y1 = iniciar(numero_clases=3, numero_ejemplos=300, graficar_datos=True)
 
-#Test
-x2 = np.zeros((300, 2))
-pesos2 = inicializar_pesos(2,100,3)
-clasificar(x2,pesos2)
+# #Test
+# x2 = np.zeros((300, 2))
+# pesos2 = inicializar_pesos(2,100,3)
+# clasificar(x2,pesos2)
 
 #Accuracy
 
