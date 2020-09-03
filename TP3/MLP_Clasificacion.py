@@ -26,29 +26,6 @@ def generar_datos_clasificacion(cantidad_ejemplos, cantidad_clases):
 
     return x, t
 
-def generar_nuevos_datos(cantidad_ejemplos, cantidad_clases):
-    x = np.zeros((cantidad_ejemplos, 2))
-    t = np.zeros(cantidad_ejemplos, dtype="uint8")  
-
-    k = [-0.4, 0, 0.4]  #corrimiento horizontal de las curvas
-    output_range = [] #lista dinamica desde 0 a la cantidad de clases -1
-    r1 = 0 
-    while(r1 < cantidad_clases): 
-        output_range.append(r1) 
-        r1 += 1
-
-    count = 0
-    for i in range(cantidad_ejemplos):
-        x[i][0] = np.random.uniform(-1,1)        #x
-        #t[i] = np.random.choice(output_range)           
-        if i >= (int)(cantidad_ejemplos/cantidad_clases)*(count+1):
-            count += 1 
-        t[i] = count
-        c2 = k[t[i]]
-        x[i][1] = 1/(1+np.exp(-10*(x[i][0]-c2)))  #y
-
-    return x, t
-
 def inicializar_pesos(n_entrada, n_capa_2, n_capa_3):
     randomgen = np.random.default_rng()
 
@@ -152,13 +129,13 @@ def train(x, t, pesos, learning_rate, epochs):
 
 def iniciar(numero_clases, numero_ejemplos, graficar_datos):
     x, t = generar_datos_clasificacion(numero_ejemplos, numero_clases)
-    x2, t2 = generar_nuevos_datos(numero_ejemplos, numero_clases)
+    x2, t2 = generar_datos_clasificacion((int)(numero_ejemplos/10), numero_clases) #nuevos datos para test
 
     if graficar_datos:
         plt.scatter(x[:, 0], x[:, 1], c=t)
         plt.show()
 
-        plt.scatter(x2[:, 0], x2[:, 1], c=t)
+        plt.scatter(x2[:, 0], x2[:, 1], c=t2)
         plt.show()
 
     NEURONAS_CAPA_OCULTA = 100
