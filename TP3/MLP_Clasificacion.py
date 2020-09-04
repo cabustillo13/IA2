@@ -204,23 +204,29 @@ def validation(x, t, pesos, learning_rate, epochs, tolerancia, paso, lossTrain):
     loss_list = list()
     epochs_list = list()
     lossValidation = list()
-   
+
+    cont=0
     for i in range(epochs):
         resultados_feed_forward = ejecutar_adelante(x, pesos)
         y = resultados_feed_forward["y"]
         h = resultados_feed_forward["h"]
         z = resultados_feed_forward["z"]
- 
+        
         exp_scores = np.exp(y)
         sum_exp_scores = np.sum(exp_scores, axis=1, keepdims=True)
         p = exp_scores / sum_exp_scores
-       
+        
         loss = (1 / m) * np.sum( -np.log( p[range(m), t] ))
        
         if i%paso == 0:
             lossValidation.append(loss)
-            if abs(lossTrain[i]-lossValidation[i]) > tolerancia:
+            
+            #Parada temprana para validacion -> valor del error absoluto
+            valor = lossTrain[cont]-lossValidation[cont]
+            #print(valor)
+            if abs(valor)>tolerancia:
                 break
+            cont = cont+1
         
         w1 = pesos["w1"]
         b1 = pesos["b1"]
@@ -246,13 +252,17 @@ def validation(x, t, pesos, learning_rate, epochs, tolerancia, paso, lossTrain):
         pesos["w2"] = w2
         pesos["b2"] = b2   
     
-    plt.plot(np.arange(0,epochs,paso), lossValidation)
-    plt.plot(np.arange(0,epochs,paso), lossTrain)
-    plt.legend(["LossValidation", "LossTraining"])
+    #len(lossTrain) es constante, mientras que len(lossValidation) varia debido a la tolerancia impuesta en la parada temprana
+    #Lo que hacemos es eliminar los datos de la lista lossTrain -> si quisieramos podemos hacer un .copy() para duplicar la lista 
+    #Por ahora no hace falta ese paso, porque solo necesitamos esta lista para graficar
+    
+    tamano = len(lossValidation)
+    del lossTrain[tamano:len(lossTrain)] #A partir de tamano hasta el ultimo elemento de la lista lossValidation se descartan
+    
+    plt.plot(np.arange(0,tamano*paso,paso), lossValidation)   #np.arange(valor inicial, valor final, paso)
+    plt.plot(np.arange(0,tamano*paso,paso), lossTrain)
+    plt.legend(["lossValidation", "lossTrain"])
     plt.show()
-    return lossValidation
-#Aca entramos con los parametros ya optimizados
-
 
 def k_fold(K, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases):
    Lrate_list = np.linspace(0.1,LEARNING_RATE,K)
@@ -268,7 +278,6 @@ def k_fold(K, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases):
        y = ret["y"]
        pesos = ret["pesos"]
      
-     #clasificar(x, pesos)
        predicted_class = np.argmax(y, axis=1)
        p_learning_rate["performance"].append(np.mean(predicted_class == t))
    
@@ -276,8 +285,8 @@ def k_fold(K, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases):
    p = p_learning_rate["performance"]
    index = p.index(max(p)) #la maxima performance
    LEARNING_RATE = p_learning_rate["value"][index] #best learning rate
-   print("Best learning rate:", LEARNING_RATE)
-   print(p_learning_rate["performance"])
+   #print("Best learning rate:", LEARNING_RATE)
+   #print(p_learning_rate["performance"])
  
    for i in range(K): #quedan fijo LEARNING RATE
        x, t = generar_datos_clasificacion(numero_ejemplos, numero_clases)
@@ -292,8 +301,8 @@ def k_fold(K, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases):
    p = p_epochs["performance"]
    index = p.index(max(p)) #la maxima performance
    EPOCHS = p_epochs["value"][index] #best learning rate
-   print("Best epochs value:", EPOCHS)
-   print(p_epochs["performance"])
+   #print("Best epochs value:", EPOCHS)
+   #print(p_epochs["performance"])
    
    return LEARNING_RATE, EPOCHS
 
@@ -322,16 +331,14 @@ def iniciar(numero_clases, numero_ejemplos, graficar_datos):
   
    LEARNING_RATE, EPOCHS = k_fold(10, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases) #K=10
    paso = 200
-   tol = 0.001 
+   tol = 0.3 
    
    training = train(x, t, pesos, LEARNING_RATE, EPOCHS, paso, True)
    lossTraining = training["lossT"]
 
-   lossValidation = validation(x2, t2, pesos, LEARNING_RATE, EPOCHS, tol, paso, lossTraining)
+   #Invocar funcion para graficar
+   validation(x2, t2, pesos, LEARNING_RATE, EPOCHS, tol, paso, lossTraining)
    
-
-   
-
    # etapa_training = train(x, t, pesos, LEARNING_RATE, EPOCHS)
    # y = etapa_training["y"]
    # pesos = etapa_training["pesos"]
