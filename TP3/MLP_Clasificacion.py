@@ -264,6 +264,25 @@ def validation(x, t, pesos, learning_rate, epochs, tolerancia, paso, lossTrain):
     plt.legend(["lossValidation", "lossTrain"])
     plt.show()
 
+def test(x, t, pesos, learning_rate, paso, lossTrain):
+# Cantidad de filas (i.e. cantidad de ejemplos)
+
+    resultados_feed_forward = ejecutar_adelante(x, pesos)
+    y = resultados_feed_forward["y"]
+    h = resultados_feed_forward["h"]
+    z = resultados_feed_forward["z"]
+#SACAR EL FOR Y MEDIR LOS CASOS VERDADEROS EN BASE A EFICIENCIA  (CON VALORES MAX)
+    predicted_class = np.argmax(y, axis=1)
+    performance=(np.mean(predicted_class == t))
+
+#
+#    plt.plot(np.arange(0,tamano*paso,paso), lossTest)
+#    plt.plot(np.arange(0,tamano*paso,paso), lossTrain)
+#    plt.plot(np.arange(0,tamano*paso,paso), error)
+#    plt.legend(["lossTest", "lossTrain","Error"])
+#    plt.show()
+    print("Eficiencia en test: ",performance)
+
 def k_fold(K, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases):
    Lrate_list = np.linspace(0.1,LEARNING_RATE,K)
    epochs_list = np.arange(EPOCHS,EPOCHS+1000*K,1000,dtype=int)
@@ -311,7 +330,7 @@ def k_fold(K, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases):
 def iniciar(numero_clases, numero_ejemplos, graficar_datos):
    x, t = generar_datos_clasificacion(numero_ejemplos, numero_clases)
    x2, t2 = generar_datos_clasificacion((int)(numero_ejemplos/10), numero_clases) #nuevos datos para test
-   x3, t3 = generar_datos_clasificacion((int)(numero_ejemplos/5), numero_clases)
+   x3, t3 = generar_datos_clasificacion((int)(numero_ejemplos/5), numero_clases) #datos para el test
  
  
  
@@ -320,6 +339,9 @@ def iniciar(numero_clases, numero_ejemplos, graficar_datos):
        plt.show()
  
        plt.scatter(x2[:, 0], x2[:, 1], c=t2)
+       plt.show()
+
+       plt.scatter(x3[:, 0], x3[:, 1], c=t3)
        plt.show()
  
    NEURONAS_CAPA_OCULTA = 100
@@ -339,6 +361,8 @@ def iniciar(numero_clases, numero_ejemplos, graficar_datos):
    #Invocar funcion para graficar
    validation(x2, t2, pesos, LEARNING_RATE, EPOCHS, tol, paso, lossTraining)
    
+    #Test
+   test(x3, t3, pesos, LEARNING_RATE, paso, lossTraining)
    # etapa_training = train(x, t, pesos, LEARNING_RATE, EPOCHS)
    # y = etapa_training["y"]
    # pesos = etapa_training["pesos"]
