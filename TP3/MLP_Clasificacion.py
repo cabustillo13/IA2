@@ -331,7 +331,7 @@ def iniciar(numero_clases, numero_ejemplos, graficar_datos):
   
    LEARNING_RATE, EPOCHS = k_fold(10, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases) #K=10
    paso = 200
-   tol = 0.3 
+   tol = 0.15 
    
    training = train(x, t, pesos, LEARNING_RATE, EPOCHS, paso, True)
    lossTraining = training["lossT"]

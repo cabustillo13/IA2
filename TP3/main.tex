@@ -1,0 +1,66 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{subcaption}
+\usepackage{mwe}
+\usepackage{listings}
+\usepackage[section]{placeins}
+\usepackage[export]{adjustbox}
+
+\pagestyle{plain}
+\pagenumbering{arabic}
+
+
+\title{Informe del Trabajo Práctico 3: Machine Learning}
+
+\author{Agüero, Emanuel\\
+\and
+Bustillo, Carlos\\
+\and
+Lezcano, Agustín\\
+}
+
+\date{04 de septiembre de 2020}
+
+\begin{document}
+
+\maketitle
+
+\section{Introducción}
+
+El objetivo del trabajo práctico es implementar una  red neuronal feedforward fully connected de 1 capa oculta
+para poder clasificar tres grupos distintos generados de manera ficticia, mediante la implementación de un MLP. 
+
+El número de entradas son dos (según los ejes de las coordenadas cartesianas) y al ser tres grupos, las salidas son  3.
+
+\section{Accuracy y Loss}
+Se busca el máximo de cada fila en la salida real y  se obtiene un vector de 300x1 (se encuentra el índice donde está el valor máximo de la lista). Posteriormente se compara fila por fila el valor del vector (que es el máximo de cada fila de) con la salida target donde coincida. Si coincide le asigna el valor 1, sino 0.
+
+\section{Lerning rate, loss y parada temprana}
+Se utilizó una pequeña fracción de datos para la validación y para el test.
+
+El learning rate es la tasa de aprendizaje es un parámetro de ajuste en un algoritmo de optimización que determina el tamaño del paso en cada iteración mientras se mueve hacia un mínimo de una función de pérdida. Osea representa la magnitud con el que se mueve en el gradinte mientras que el loss define la dirección.
+
+Aplicamos K fold para tener los parámetros ya optimizados al momento de evaluar el error entre el loss obtenido del Train y el loss obtenido en Validation. Y en caso de que el error absoluto supere el valor de tolerancia deja de estar evaluando. 
+
+También aclarar que cuando evaluamos el K fold, en una primera etapa variamos el learning rate y mantenemos fijos los epochs. Luego definido el learning rate se deja fijo y variamos los epochs.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{TP3_ej3_1.png}
+    \caption{Comparar loss del Train vrs Loss de Validation para un valor de tolerancia = 0.3}
+    \label{fig:TP3_ej3_1}
+\end{figure}
+
+\section{Nuevo generador de set de datos}
+Proponemos la alternativa de funciones sigmoidales con corrimiento, para tener un mayor solapamiento entre las clases.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{TP3_ej3_2.png}
+    \caption{Nuevo conjunto obtenido en el plano}
+    \label{fig:TP3_ej3_2}
+\end{figure}
+
+
+\end{document}
