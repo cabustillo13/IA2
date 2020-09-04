@@ -1,6 +1,3 @@
-#PARA PYTHON3
-import TP3_ej1
-
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -46,7 +43,7 @@ def lossRegresion(output,t):
 #############
 
 #Generar nuevos tipos de datos -> En este caso usamos seno hiperbolico y coseno hiperbolico para que el conjunto nos aparezca como una linea recta donde aparece un solamiento de las clases
-#########
+######### #Funcion sigmoidal
 def generar_nuevos_datos(cantidad_ejemplos,cantidad_clases):
     
     FACTOR_ANGULO = 0.79
@@ -136,11 +133,12 @@ def clasificar(x, pesos):
 # x: n entradas para cada uno de los m ejemplos(nxm)
 # t: salida correcta (target) para cada uno de los m ejemplos (m x 1)
 # pesos: pesos (W y b)
-def train(x, t, pesos, learning_rate, epochs):
+def train(x, t, pesos, learning_rate, epochs, paso=0, flag=False):
    # Cantidad de filas (i.e. cantidad de ejemplos)
    m = np.size(x, 0)
    loss_list = list()
    epochs_list = list()
+   lossTraining = list()
  
    for i in range(epochs):
        resultados_feed_forward = ejecutar_adelante(x, pesos)
@@ -152,11 +150,14 @@ def train(x, t, pesos, learning_rate, epochs):
        sum_exp_scores = np.sum(exp_scores, axis=1, keepdims=True)
        p = exp_scores / sum_exp_scores
        loss = (1 / m) * np.sum( -np.log( p[range(m), t] ))
-      
-       if i %1000 == 0:
-           # print("Loss epoch", i, ":", loss)
+
+       if i%1000 == 0:
+        #    print("Loss epoch", i, ":", loss)
            loss_list.append(loss)
            epochs_list.append(i)
+        
+       if flag and i%paso==0:
+            lossTraining.append(loss)
  
        w1 = pesos["w1"]
        b1 = pesos["b1"]
@@ -195,9 +196,9 @@ def train(x, t, pesos, learning_rate, epochs):
    # ax.grid()
    # plt.show()
  
-   return {"y": y, "pesos": pesos}
+   return {"y": y, "pesos": pesos, "lossT": lossTraining}
 
-def validation(x, t, pesos, learning_rate, epochs, tolerancia, paso):
+def validation(x, t, pesos, learning_rate, epochs, tolerancia, paso, lossTrain):
     # Cantidad de filas (i.e. cantidad de ejemplos)
     m = np.size(x, 0)
     loss_list = list()
@@ -216,44 +217,39 @@ def validation(x, t, pesos, learning_rate, epochs, tolerancia, paso):
        
         loss = (1 / m) * np.sum( -np.log( p[range(m), t] ))
        
-        if (i%paso == 0 and i>0):
+        if i%paso == 0:
             lossValidation.append(loss)
- 
- 
+            if abs(lossTrain[i]-lossValidation[i]) > tolerancia:
+                break
+        
         w1 = pesos["w1"]
         b1 = pesos["b1"]
         w2 = pesos["w2"]
         b2 = pesos["b2"]
  
-        # Ajustamos los pesos: Backpropagation
         dL_dy = p                # Para todas las salidas, L' = p (la probabilidad)...
         dL_dy[range(m), t] -= 1  # ... excepto para la clase correcta
         dL_dy /= m
- 
         dL_dw2 = h.T.dot(dL_dy)                         # Ajuste para w2
         dL_db2 = np.sum(dL_dy, axis=0, keepdims=True)   # Ajuste para b2
- 
         dL_dh = dL_dy.dot(w2.T)
-      
         dL_dz = dL_dh       # El calculo dL/dz = dL/dh * dh/dz. La funcion "h" es la funcion de activacion de la capa oculta,
         dL_dz[z <= 0] = 0   # para la que usamos ReLU. La derivada de la funcion ReLU: 1(z > 0) (0 en otro caso)
- 
         dL_dw1 = x.T.dot(dL_dz)                         # Ajuste para w1
         dL_db1 = np.sum(dL_dz, axis=0, keepdims=True)   # Ajuste para b1
- 
         w1 += -learning_rate * dL_dw1 #Ajuste de pesos
         b1 += -learning_rate * dL_db1
         w2 += -learning_rate * dL_dw2
         b2 += -learning_rate * dL_db2
- 
         pesos["w1"] = w1 #Extraccion de pesos como variables locales
         pesos["b1"] = b1
         pesos["w2"] = w2
-        pesos["b2"] = b2
-     
-        loss_past = loss
+        pesos["b2"] = b2   
     
-       
+    plt.plot(np.arange(0,epochs,paso), lossValidation)
+    plt.plot(np.arange(0,epochs,paso), lossTrain)
+    plt.legend(["LossValidation", "LossTraining"])
+    plt.show()
     return lossValidation
 #Aca entramos con los parametros ya optimizados
 
@@ -322,12 +318,20 @@ def iniciar(numero_clases, numero_ejemplos, graficar_datos):
    pesos = inicializar_pesos(n_entrada=NEURONAS_ENTRADA, n_capa_2=NEURONAS_CAPA_OCULTA, n_capa_3=numero_clases)
  
    LEARNING_RATE=1
-   EPOCHS=6000
+   EPOCHS=1000
   
    LEARNING_RATE, EPOCHS = k_fold(10, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases) #K=10
    paso = 200
-   tol = 0.03   
-   validation(x2, t2, pesos, LEARNING_RATE, EPOCHS, tol, paso, loss_list)
+   tol = 0.001 
+   
+   training = train(x, t, pesos, LEARNING_RATE, EPOCHS, paso, True)
+   lossTraining = training["lossT"]
+
+   lossValidation = validation(x2, t2, pesos, LEARNING_RATE, EPOCHS, tol, paso, lossTraining)
+   
+
+   
+
    # etapa_training = train(x, t, pesos, LEARNING_RATE, EPOCHS)
    # y = etapa_training["y"]
    # pesos = etapa_training["pesos"]
@@ -342,23 +346,3 @@ def iniciar(numero_clases, numero_ejemplos, graficar_datos):
  
 iniciar(numero_clases=3, numero_ejemplos=300, graficar_datos=False)
 
-#Comparar las listas loss
-comparar=lossTrain-lossValidation
-plt.imshow(comparar)    
-plt.show()
-
-
-#############
-## TP3_ej1 ##
-#############
-#Train
-# x1, t1, y1 = iniciar(numero_clases=3, numero_ejemplos=300, graficar_datos=True)
-
-# #Test
-# x2 = np.zeros((300, 2))
-# pesos2 = inicializar_pesos(2,100,3)
-# clasificar(x2,pesos2)
-
-#Accuracy
-
- 
