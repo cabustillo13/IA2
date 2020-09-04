@@ -83,7 +83,7 @@ def train(x, t, pesos, learning_rate, epochs):
         loss = (1 / m) * np.sum( -np.log( p[range(m), t] ))
         
         if i %1000 == 0:
-            print("Loss epoch", i, ":", loss)
+            # print("Loss epoch", i, ":", loss)
             loss_list.append(loss)
             epochs_list.append(i)
 
@@ -117,15 +117,39 @@ def train(x, t, pesos, learning_rate, epochs):
         pesos["b1"] = b1
         pesos["w2"] = w2
         pesos["b2"] = b2
-
-    predicted_class = np.argmax(y, axis=1)
-    print('Precision de entrenamiento: %.2f' % (np.mean(predicted_class == t)))
     
     fig, ax = plt.subplots()
     ax.plot(epochs_list, loss_list)
     ax.set(xlabel='Epochs', ylabel='Loss')
     ax.grid()
     plt.show()
+
+    return {"y": y, "pesos": pesos}  
+
+def k_fold(K, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases):
+    Lrate_list = np.linspace(0.1,LEARNING_RATE,K)
+    epochs_list = np.linspace(EPOCHS,(int)(EPOCHS*1.5),K)
+
+    p_learning_rate = {"performance": list(), "value": Lrate_list} #performance learning rate
+    p_epochs = {"performance": list(), "value": epochs_list}
+    
+    for i in range(K): #quedan fijos los epochs
+        x, t = generar_datos_clasificacion(numero_ejemplos, numero_clases)
+
+        ret = train(x, t, pesos, Lrate_list[i], EPOCHS)
+        y = ret["y"]
+        pesos = ret["pesos"]
+
+        predicted_class = np.argmax(y, axis=1)
+        p_learning_rate["performance"].append(np.mean(predicted_class == t))
+
+    p = p_learning_rate["performance"]
+    index = p.index(max(p)) #la maxima performance
+    LEARNING_RATE = p_learning_rate["value"][index] #best learning rate
+    print("Best learning rate:" % LEARNING_RATE)
+    
+    #aca volver a iterar pero variando epochs con el mejor learning rate
+
 
 def iniciar(numero_clases, numero_ejemplos, graficar_datos):
     x, t = generar_datos_clasificacion(numero_ejemplos, numero_clases)
@@ -144,10 +168,22 @@ def iniciar(numero_clases, numero_ejemplos, graficar_datos):
 
     LEARNING_RATE=1
     EPOCHS=10000
-    #train(x, t, pesos, LEARNING_RATE, EPOCHS)
-    train(x2,t2,pesos,LEARNING_RATE,EPOCHS)
+    
+    k_fold(10, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases) #K=10
 
-iniciar(numero_clases=3, numero_ejemplos=300, graficar_datos=True)
+    # etapa_training = train(x, t, pesos, LEARNING_RATE, EPOCHS)
+    # y = etapa_training["y"]
+    # pesos = etapa_training["pesos"]
+
+    # predicted_class = np.argmax(y, axis=1)
+    # print('Precision de ENTRENAMIENTO: %.2f' % (np.mean(predicted_class == t)))
+    
+    # etapa_test = train(x2,t2,pesos,LEARNING_RATE,EPOCHS)
+    # y2 = etapa_test["y"]
+    # predicted_class = np.argmax(y2, axis=1)
+    # print('Precision de TEST: %.2f' % (np.mean(predicted_class == t2)))
+
+iniciar(numero_clases=3, numero_ejemplos=300, graficar_datos=False)
 
 #############
 ## TP3_ej1 ##
