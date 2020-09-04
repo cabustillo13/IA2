@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-##########
 #Se propone funciones sigmoidales para notar superposicion de las clases
 def generar_nuevos_datos(cantidad_ejemplos, cantidad_clases):
     x = np.zeros((cantidad_ejemplos, 2))
@@ -17,20 +16,16 @@ def generar_nuevos_datos(cantidad_ejemplos, cantidad_clases):
     count = 0
     for i in range(cantidad_ejemplos):
         x[i][0] = np.random.uniform(-1,1)        #x
-        #t[i] = np.random.choice(output_range)           
         if i >= (int)(cantidad_ejemplos/cantidad_clases)*(count+1):
             count += 1 
         t[i] = count
 
-        #ReLU nos va a servir para punto 6)
         c2 = k[t[i]]
         c1 = 10    
         x[i][1] = 1/(1+np.exp(-c1*(x[i][0]-c2)))  #y
 
     return x, t
-##########
 
-##########
 #Calculo de Loss en Regression MSE -> Nos vas a servir para el punto 5.a) 
 def lossRegresion(output,t):
     loss = list()
@@ -40,37 +35,7 @@ def lossRegresion(output,t):
         
     plt.plot(loss)
     plt.show()
-#############
 
-#Generar nuevos tipos de datos -> En este caso usamos seno hiperbolico y coseno hiperbolico para que el conjunto nos aparezca como una linea recta donde aparece un solamiento de las clases
-######### #Funcion sigmoidal
-def generar_nuevos_datos(cantidad_ejemplos,cantidad_clases):
-    
-    FACTOR_ANGULO = 0.79
-    AMPLITUD_ALEATORIEDAD = 0.1
-    n = int(cantidad_ejemplos / cantidad_clases)
-    x = np.zeros((cantidad_ejemplos, 2))
-    t = np.zeros(cantidad_ejemplos, dtype="uint8")  
-    randomgen = np.random.default_rng()
-
-    for clase in range(cantidad_clases):
-        radios = np.linspace(0, 1, n) + AMPLITUD_ALEATORIEDAD * randomgen.standard_normal(size=n)
-        angulos = np.linspace(clase * np.pi * FACTOR_ANGULO, (clase + 1) * np.pi * FACTOR_ANGULO, n)
-        indices = range(clase * n, (clase + 1) * n)
-        x1 = radios * np.sinh(angulos)
-        x2 = radios * np.cosh(angulos)
-        x[indices] = np.c_[x1, x2]
-        t[indices] = clase
-        
-    plt.scatter(x[:, 0], x[:, 1], s=40, cmap=plt.cm.Spectral)
-    plt.show()
-    
-    return x, t
-###########
-
-# Generador basado en ejemplo del curso CS231 de Stanford: 
-# CS231n Convolutional Neural Networks for Visual Recognition
-# (https://cs231n.github.io/neural-networks-case-study/)
 def generar_datos_clasificacion(cantidad_ejemplos, cantidad_clases):
    FACTOR_ANGULO = 0.79
    AMPLITUD_ALEATORIEDAD = 0.1
@@ -90,7 +55,6 @@ def generar_datos_clasificacion(cantidad_ejemplos, cantidad_clases):
  
    return x, t
 
-
 def inicializar_pesos(n_entrada, n_capa_2, n_capa_3):
    randomgen = np.random.default_rng()
  
@@ -102,7 +66,6 @@ def inicializar_pesos(n_entrada, n_capa_2, n_capa_3):
  
    return {"w1": w1, "b1": b1, "w2": w2, "b2": b2}
 
-
 def ejecutar_adelante(x, pesos):
    # Funcion de entrada (a.k.a. "regla de propagacion") para la primera capa oculta
    z = x.dot(pesos["w1"]) + pesos["b1"]
@@ -112,7 +75,6 @@ def ejecutar_adelante(x, pesos):
    # las neuronas y para todos los ejemplos proporcionados
    y = h.dot(pesos["w2"]) + pesos["b2"]
    return {"z": z, "h": h, "y": y}
-
 
 def clasificar(x, pesos):
    # Corremos la red "hacia adelante"
@@ -128,7 +90,6 @@ def clasificar(x, pesos):
    # Nuevamente, dado que max_scores puede contener varios renglones (uno por cada ejemplo),
    # retornamos la primera columna
    return max_scores[:][0]
-
 
 # x: n entradas para cada uno de los m ejemplos(nxm)
 # t: salida correcta (target) para cada uno de los m ejemplos (m x 1)
@@ -265,22 +226,13 @@ def validation(x, t, pesos, learning_rate, epochs, tolerancia, paso, lossTrain):
     plt.show()
 
 def test(x, t, pesos, learning_rate, paso, lossTrain):
-# Cantidad de filas (i.e. cantidad de ejemplos)
-
     resultados_feed_forward = ejecutar_adelante(x, pesos)
     y = resultados_feed_forward["y"]
     h = resultados_feed_forward["h"]
     z = resultados_feed_forward["z"]
-#SACAR EL FOR Y MEDIR LOS CASOS VERDADEROS EN BASE A EFICIENCIA  (CON VALORES MAX)
+
     predicted_class = np.argmax(y, axis=1)
     performance=(np.mean(predicted_class == t))
-
-#
-#    plt.plot(np.arange(0,tamano*paso,paso), lossTest)
-#    plt.plot(np.arange(0,tamano*paso,paso), lossTrain)
-#    plt.plot(np.arange(0,tamano*paso,paso), error)
-#    plt.legend(["lossTest", "lossTrain","Error"])
-#    plt.show()
     print("Eficiencia en test: ",performance)
 
 def k_fold(K, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases):
@@ -325,44 +277,48 @@ def k_fold(K, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases):
    
    return LEARNING_RATE, EPOCHS
 
+def iniciar(set_datos, numero_clases, numero_ejemplos, graficar_datos):
+    if set_datos == 1:
+        x, t = generar_datos_clasificacion(numero_ejemplos, numero_clases)
+        x2, t2 = generar_datos_clasificacion((int)(numero_ejemplos/10), numero_clases) #datos para validation
+        x3, t3 = generar_datos_clasificacion((int)(numero_ejemplos/5), numero_clases) #datos para el test
+    else:
+        x, t = generar_nuevos_datos(numero_ejemplos, numero_clases)
+        x2, t2 = generar_nuevos_datos((int)(numero_ejemplos/10), numero_clases) #datos para validation
+        x3, t3 = generar_nuevos_datos((int)(numero_ejemplos/5), numero_clases) #datos para el test
+    
+    if graficar_datos:
+        plt.scatter(x[:, 0], x[:, 1], c=t)
+        plt.show()
 
+        plt.scatter(x2[:, 0], x2[:, 1], c=t2)
+        plt.show()
 
-def iniciar(numero_clases, numero_ejemplos, graficar_datos):
-   x, t = generar_datos_clasificacion(numero_ejemplos, numero_clases)
-   x2, t2 = generar_datos_clasificacion((int)(numero_ejemplos/10), numero_clases) #nuevos datos para test
-   x3, t3 = generar_datos_clasificacion((int)(numero_ejemplos/5), numero_clases) #datos para el test
+        plt.scatter(x3[:, 0], x3[:, 1], c=t3)
+        plt.show()
  
+    NEURONAS_CAPA_OCULTA = 100
+    NEURONAS_ENTRADA = 2
+    pesos = inicializar_pesos(n_entrada=NEURONAS_ENTRADA, n_capa_2=NEURONAS_CAPA_OCULTA, n_capa_3=numero_clases)
  
- 
-   if graficar_datos:
-       plt.scatter(x[:, 0], x[:, 1], c=t)
-       plt.show()
- 
-       plt.scatter(x2[:, 0], x2[:, 1], c=t2)
-       plt.show()
-
-       plt.scatter(x3[:, 0], x3[:, 1], c=t3)
-       plt.show()
- 
-   NEURONAS_CAPA_OCULTA = 100
-   NEURONAS_ENTRADA = 2
-   pesos = inicializar_pesos(n_entrada=NEURONAS_ENTRADA, n_capa_2=NEURONAS_CAPA_OCULTA, n_capa_3=numero_clases)
- 
-   LEARNING_RATE=1
-   EPOCHS=1000
+    LEARNING_RATE=1
+    EPOCHS=1000
   
-   LEARNING_RATE, EPOCHS = k_fold(10, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases) #K=10
-   paso = 200
-   tol = 0.15 
+    LEARNING_RATE, EPOCHS = k_fold(10, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases) #K=10 #ej3
+    paso = 200
+    tol = 0.15 
    
-   training = train(x, t, pesos, LEARNING_RATE, EPOCHS, paso, True)
-   lossTraining = training["lossT"]
+    training = train(x, t, pesos, LEARNING_RATE, EPOCHS, paso, True)
+    lossTraining = training["lossT"]
+
+    y= training["y"]
+    print("Eficiencia en training", np.mean(np.argmax(y, axis=1) == t)) #ej 2a
 
    #Invocar funcion para graficar
-   validation(x2, t2, pesos, LEARNING_RATE, EPOCHS, tol, paso, lossTraining)
+    validation(x2, t2, pesos, LEARNING_RATE, EPOCHS, tol, paso, lossTraining) 
    
     #Test
-   test(x3, t3, pesos, LEARNING_RATE, paso, lossTraining)
+    test(x3, t3, pesos, LEARNING_RATE, paso, lossTraining) #ej 2b
    # etapa_training = train(x, t, pesos, LEARNING_RATE, EPOCHS)
    # y = etapa_training["y"]
    # pesos = etapa_training["pesos"]
@@ -375,5 +331,6 @@ def iniciar(numero_clases, numero_ejemplos, graficar_datos):
    # predicted_class = np.argmax(y2, axis=1)
    # print('Precision de TEST: %.2f' % (np.mean(predicted_class == t2)))
  
-iniciar(numero_clases=3, numero_ejemplos=300, graficar_datos=False)
+iniciar(numero_clases=3, numero_ejemplos=300, graficar_datos=False, 1) #set de datos originales
+iniciar(2, numero_clases=3, numero_ejemplos=300, graficar_datos=False) #Nuevo set de datos #ej 4
 
