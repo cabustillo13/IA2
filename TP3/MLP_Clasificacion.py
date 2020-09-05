@@ -25,8 +25,20 @@ def generar_datos_continuos(cantidad_ejemplos, cantidad_clases):
     FACTOR_ANGULO = 0.79
     AMPLITUD_ALEATORIEDAD = 0.1
     n = int(cantidad_ejemplos / cantidad_clases)
-    x = np.zeros((cantidad_ejemplos, 2))
+
+    angulos = np.linspace(1 * np.pi * FACTOR_ANGULO, (1 + 1) * np.pi * FACTOR_ANGULO, n)
+    x = np.zeros((cantidad_ejemplos, 1))
     t = np.zeros(cantidad_ejemplos, dtype="uint8") 
+    suma = np.arange(0,cantidad_ejemplos,1)
+    z = np.arange(0,cantidad_ejemplos,1)
+
+    t = AMPLITUD_ALEATORIEDAD * (np.cos(angulos)+suma)
+    x = t + np.random.uniform(-1,1)
+    
+    plt.plot(z, x, t)
+    
+    
+    '''
     randomgen = np.random.default_rng()
  
     for clase in range(cantidad_clases):
@@ -37,7 +49,7 @@ def generar_datos_continuos(cantidad_ejemplos, cantidad_clases):
        x2 = radios * np.cos(angulos) * np.exp(-FACTOR_ANGULO)
        x[indices] = np.c_[x1, x2]
        t[indices] = clase
- 
+    '''
     return x, t
    ####################################################################################
 
@@ -343,7 +355,12 @@ def iniciar(set_datos, numero_clases, numero_ejemplos, graficar_datos=False):
         x, t = generar_nuevos_datos(numero_ejemplos, numero_clases)
         x2, t2 = generar_nuevos_datos((int)(numero_ejemplos/5), numero_clases) #datos para validation
         x3, t3 = generar_nuevos_datos((int)(numero_ejemplos/10), numero_clases) #datos para el test
-    
+    else:
+        x, t = generar_datos_continuos(numero_ejemplos, numero_clases)
+        x2, t2 = generar_datos_continuos((int)(numero_ejemplos/5), numero_clases) #datos para validation
+        x3, t3 = generar_datos_continuos((int)(numero_ejemplos/10), numero_clases) #datos para el test
+
+
     if graficar_datos:
         plt.scatter(x[:, 0], x[:, 1], c=t)
         plt.show()
@@ -382,5 +399,5 @@ def iniciar(set_datos, numero_clases, numero_ejemplos, graficar_datos=False):
    
 iniciar(1, numero_clases=3, numero_ejemplos=300, graficar_datos=False) #set de datos originales 
 iniciar(2, numero_clases=3, numero_ejemplos=300, graficar_datos=False) #Nuevo set de datos #ej 4
-iniciar(3, numero_clases=3, numero_ejemplos=300, graficar_datos=True) #Nuevo set de datos #ej 5
+iniciar(3, numero_clases=1, numero_ejemplos=300, graficar_datos=False) #Nuevo set de datos #ej 5
 #FALTA AGREGAR LA REGRESION
