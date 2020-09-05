@@ -20,7 +20,26 @@ def generar_nuevos_datos(cantidad_ejemplos, cantidad_clases):
     # plt.show()
     return x, t
 
-
+#Datos continuos
+def generar_datos_continuos(cantidad_ejemplos, cantidad_clases):
+    FACTOR_ANGULO = 0.79
+    AMPLITUD_ALEATORIEDAD = 0.1
+    n = int(cantidad_ejemplos / cantidad_clases)
+    x = np.zeros((cantidad_ejemplos, 2))
+    t = np.zeros(cantidad_ejemplos, dtype="uint8") 
+    randomgen = np.random.default_rng()
+ 
+    for clase in range(cantidad_clases):
+       radios = np.linspace(0, 1, n) 
+       angulos = np.linspace(clase * np.pi * FACTOR_ANGULO, (clase + 1) * np.pi * FACTOR_ANGULO, n)
+       indices = range(clase * n, (clase + 1) * n)
+       x1 = radios * np.cos(angulos) * np.exp(-FACTOR_ANGULO)
+       x2 = radios * np.cos(angulos) * np.exp(-FACTOR_ANGULO)
+       x[indices] = np.c_[x1, x2]
+       t[indices] = clase
+ 
+    return x, t
+   ####################################################################################
 
 def generar_datos_clasificacion(cantidad_ejemplos, cantidad_clases):
    FACTOR_ANGULO = 0.79
@@ -363,3 +382,5 @@ def iniciar(set_datos, numero_clases, numero_ejemplos, graficar_datos=False):
    
 iniciar(1, numero_clases=3, numero_ejemplos=300, graficar_datos=False) #set de datos originales 
 iniciar(2, numero_clases=3, numero_ejemplos=300, graficar_datos=False) #Nuevo set de datos #ej 4
+iniciar(3, numero_clases=3, numero_ejemplos=300, graficar_datos=True) #Nuevo set de datos #ej 5
+#FALTA AGREGAR LA REGRESION
