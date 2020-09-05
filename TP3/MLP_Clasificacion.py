@@ -26,15 +26,7 @@ def generar_nuevos_datos(cantidad_ejemplos, cantidad_clases):
 
     return x, t
 
-#Calculo de Loss en Regression MSE -> Nos vas a servir para el punto 5.a) 
-def lossRegresion(output,t):
-    loss = list()
-    
-    for i in range(len(output)):
-        loss.append((output[i] - t[i])**2)
-        
-    plt.plot(loss)
-    plt.show()
+
 
 def generar_datos_clasificacion(cantidad_ejemplos, cantidad_clases):
    FACTOR_ANGULO = 0.79
@@ -159,6 +151,70 @@ def train(x, t, pesos, learning_rate, epochs, paso=0, flag=False):
  
    return {"y": y, "pesos": pesos, "lossT": lossTraining}
 
+
+
+############################################################################
+def regresion(x, t, pesos, learning_rate, epochs, tolerancia, paso, lossTrain):
+    # Cantidad de filas (i.e. cantidad de ejemplos)
+    m = np.size(x, 0)
+
+    lossRegresion = list()
+
+    cont=0
+    for i in range(epochs):
+        resultados_feed_forward = ejecutar_adelante(x, pesos)
+        y = resultados_feed_forward["y"]
+        h = resultados_feed_forward["h"]
+        z = resultados_feed_forward["z"]
+
+        mse = (np.square(t - x)).mean(axis=None )
+
+        if i%paso == 0:
+            lossRegresion.append(mse)
+            
+            #Parada temprana para validacion -> valor del error absoluto
+            valor = lossTrain[cont]-lossRegresion[cont]
+            #print(valor)
+            if abs(valor)>tolerancia:
+                break
+            cont = cont+1
+        
+        w1 = pesos["w1"]
+        b1 = pesos["b1"]
+        w2 = pesos["w2"]
+        b2 = pesos["b2"]
+ 
+        dL_dy = 2*(t-y)/m  # ... excepto para la clase correcta
+        dL_dw2 = h.T.dot(dL_dy)                         # Ajuste para w2
+        dL_db2 = np.sum(dL_dy, axis=0, keepdims=True)   # Ajuste para b2
+        dL_dh = dL_dy.dot(w2.T)
+        #Agregar la funcion sigmoide
+        sigm=(1/(1 + np.exp(-x)))
+        dL_dz = dL_dh * sigm * (1-sigm)      # El calculo dL/dz = dL/dh * dh/dz. La funcion "h" es la funcion de activacion de la capa oculta,
+        
+        dL_dw1 = x.T.dot(dL_dz)                         # Ajuste para w1
+        dL_db1 = np.sum(dL_dz, axis=0, keepdims=True)   # Ajuste para b1
+        w1 += -learning_rate * dL_dw1 #Ajuste de pesos
+        b1 += -learning_rate * dL_db1
+        w2 += -learning_rate * dL_dw2
+        b2 += -learning_rate * dL_db2
+        pesos["w1"] = w1 #Extraccion de pesos como variables locales
+        pesos["b1"] = b1
+        pesos["w2"] = w2
+        pesos["b2"] = b2   
+
+    
+    tamano = len(lossRegresion)
+    del lossTrain[tamano:len(lossTrain)] #A partir de tamano hasta el ultimo elemento de la lista lossValidation se descartan
+    
+    plt.plot(np.arange(0,tamano*paso,paso), lossRegresion)   #np.arange(valor inicial, valor final, paso)
+    plt.plot(np.arange(0,tamano*paso,paso), lossTrain)
+    plt.legend(["lossValidation", "lossTrain"])
+    plt.show()
+############################################################################
+
+
+
 def validation(x, t, pesos, learning_rate, epochs, tolerancia, paso, lossTrain):
     # Cantidad de filas (i.e. cantidad de ejemplos)
     m = np.size(x, 0)
@@ -173,12 +229,15 @@ def validation(x, t, pesos, learning_rate, epochs, tolerancia, paso, lossTrain):
         h = resultados_feed_forward["h"]
         z = resultados_feed_forward["z"]
         
+        #clasificacion
+        
         exp_scores = np.exp(y)
         sum_exp_scores = np.sum(exp_scores, axis=1, keepdims=True)
         p = exp_scores / sum_exp_scores
         
         loss = (1 / m) * np.sum( -np.log( p[range(m), t] ))
-       
+
+
         if i%paso == 0:
             lossValidation.append(loss)
             
@@ -224,6 +283,8 @@ def validation(x, t, pesos, learning_rate, epochs, tolerancia, paso, lossTrain):
     plt.plot(np.arange(0,tamano*paso,paso), lossTrain)
     plt.legend(["lossValidation", "lossTrain"])
     plt.show()
+
+
 
 def test(x, t, pesos, learning_rate, paso, lossTrain):
     resultados_feed_forward = ejecutar_adelante(x, pesos)
@@ -331,6 +392,6 @@ def iniciar(set_datos, numero_clases, numero_ejemplos, graficar_datos):
    # predicted_class = np.argmax(y2, axis=1)
    # print('Precision de TEST: %.2f' % (np.mean(predicted_class == t2)))
  
-iniciar(numero_clases=3, numero_ejemplos=300, graficar_datos=False, 1) #set de datos originales
+iniciar(1,numero_clases=3, numero_ejemplos=300, graficar_datos=False) #set de datos originales
 iniciar(2, numero_clases=3, numero_ejemplos=300, graficar_datos=False) #Nuevo set de datos #ej 4
 
