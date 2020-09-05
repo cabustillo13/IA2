@@ -3,27 +3,21 @@ import matplotlib.pyplot as plt
 
 #Se propone funciones sigmoidales para notar superposicion de las clases
 def generar_nuevos_datos(cantidad_ejemplos, cantidad_clases):
-    x = np.zeros((cantidad_ejemplos, 2))
+    x = np.zeros((cantidad_ejemplos,2))
     t = np.zeros(cantidad_ejemplos, dtype="uint8")  
-
-    k = [-0.4, 0, 0.4]  #corrimiento horizontal de las curvas
-    output_range = [] #lista dinamica desde 0 a la cantidad de clases -1
-    r1 = 0 
-    while(r1 < cantidad_clases): 
-        output_range.append(r1) 
-        r1 += 1
-
     count = 0
+    sigma = [0.2,0.3,0.4]
+
     for i in range(cantidad_ejemplos):
-        x[i][0] = np.random.uniform(-1,1)        #x
+        x[i][0] = np.random.uniform(-1,1)
         if i >= (int)(cantidad_ejemplos/cantidad_clases)*(count+1):
             count += 1 
         t[i] = count
+        
+        x[i][1] = 1/(np.sqrt(2*np.pi)*sigma[count])*np.exp(-0.5*np.power((x[i][0]/sigma[count]),2))    
 
-        c2 = k[t[i]]
-        c1 = 10    
-        x[i][1] = 1/(1+np.exp(-c1*(x[i][0]-c2)))  #y
-
+    # plt.scatter(x[:,0], x[:,1], c=t)
+    # plt.show()
     return x, t
 
 #Calculo de Loss en Regression MSE -> Nos vas a servir para el punto 5.a) 
@@ -75,21 +69,6 @@ def ejecutar_adelante(x, pesos):
    # las neuronas y para todos los ejemplos proporcionados
    y = h.dot(pesos["w2"]) + pesos["b2"]
    return {"z": z, "h": h, "y": y}
-
-def clasificar(x, pesos):
-   # Corremos la red "hacia adelante"
-   resultados_feed_forward = ejecutar_adelante(x, pesos)
-  
-   # Buscamos la(s) clase(s) con scores mas altos (en caso de que haya mas de una con
-   # el mismo score estas podrian ser varias). Dado que se puede ejecutar en batch (x
-   # podria contener varios ejemplos), buscamos los maximos a lo largo del axis=1
-   # (es decir, por filas)
-   max_scores = np.argmax(resultados_feed_forward["y"], axis=1)
- 
-   # Tomamos el primero de los maximos (podria usarse otro criterio, como ser eleccion aleatoria)
-   # Nuevamente, dado que max_scores puede contener varios renglones (uno por cada ejemplo),
-   # retornamos la primera columna
-   return max_scores[:][0]
 
 # x: n entradas para cada uno de los m ejemplos(nxm)
 # t: salida correcta (target) para cada uno de los m ejemplos (m x 1)
@@ -181,11 +160,9 @@ def validation(x, t, pesos, learning_rate, epochs, tolerancia, paso, lossTrain):
        
         if i%paso == 0:
             lossValidation.append(loss)
-            
             #Parada temprana para validacion -> valor del error absoluto
             valor = lossTrain[cont]-lossValidation[cont]
-            #print(valor)
-            if abs(valor)>tolerancia:
+            if abs(valor)>tolerancia and i > (int)(0.1*epochs): #inicialmente pueden tener un desfasaje alto
                 break
             cont = cont+1
         
@@ -225,7 +202,7 @@ def validation(x, t, pesos, learning_rate, epochs, tolerancia, paso, lossTrain):
     plt.legend(["lossValidation", "lossTrain"])
     plt.show()
 
-def test(x, t, pesos, learning_rate, paso, lossTrain):
+def test(x, t, pesos):
     resultados_feed_forward = ejecutar_adelante(x, pesos)
     y = resultados_feed_forward["y"]
     h = resultados_feed_forward["h"]
@@ -277,15 +254,17 @@ def k_fold(K, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases):
    
    return LEARNING_RATE, EPOCHS
 
-def iniciar(set_datos, numero_clases, numero_ejemplos, graficar_datos):
+def iniciar(set_datos, numero_clases, numero_ejemplos, graficar_datos=False):
     if set_datos == 1:
+        print("Set de datos original:")
         x, t = generar_datos_clasificacion(numero_ejemplos, numero_clases)
-        x2, t2 = generar_datos_clasificacion((int)(numero_ejemplos/10), numero_clases) #datos para validation
-        x3, t3 = generar_datos_clasificacion((int)(numero_ejemplos/5), numero_clases) #datos para el test
-    else:
+        x2, t2 = generar_datos_clasificacion((int)(numero_ejemplos/5), numero_clases) #datos para validation
+        x3, t3 = generar_datos_clasificacion((int)(numero_ejemplos/10), numero_clases) #datos para el test
+    elif set_datos == 2:
+        print("Nuevo set de datos:")
         x, t = generar_nuevos_datos(numero_ejemplos, numero_clases)
-        x2, t2 = generar_nuevos_datos((int)(numero_ejemplos/10), numero_clases) #datos para validation
-        x3, t3 = generar_nuevos_datos((int)(numero_ejemplos/5), numero_clases) #datos para el test
+        x2, t2 = generar_nuevos_datos((int)(numero_ejemplos/5), numero_clases) #datos para validation
+        x3, t3 = generar_nuevos_datos((int)(numero_ejemplos/10), numero_clases) #datos para el test
     
     if graficar_datos:
         plt.scatter(x[:, 0], x[:, 1], c=t)
@@ -303,10 +282,13 @@ def iniciar(set_datos, numero_clases, numero_ejemplos, graficar_datos):
  
     LEARNING_RATE=1
     EPOCHS=1000
-  
+    
+    # tt = train(x, t, pesos, LEARNING_RATE, EPOCHS)
+    # pesos = tt["pesos"] #es necesario entrenar antes de k_fold?
+
     LEARNING_RATE, EPOCHS = k_fold(10, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases) #K=10 #ej3
     paso = 200
-    tol = 0.15 
+    tol = 0.025
    
     training = train(x, t, pesos, LEARNING_RATE, EPOCHS, paso, True)
     lossTraining = training["lossT"]
@@ -318,19 +300,7 @@ def iniciar(set_datos, numero_clases, numero_ejemplos, graficar_datos):
     validation(x2, t2, pesos, LEARNING_RATE, EPOCHS, tol, paso, lossTraining) 
    
     #Test
-    test(x3, t3, pesos, LEARNING_RATE, paso, lossTraining) #ej 2b
-   # etapa_training = train(x, t, pesos, LEARNING_RATE, EPOCHS)
-   # y = etapa_training["y"]
-   # pesos = etapa_training["pesos"]
- 
-   # predicted_class = np.argmax(y, axis=1)
-   # print('Precision de ENTRENAMIENTO: %.2f' % (np.mean(predicted_class == t)))
-  
-   # etapa_test = train(x2,t2,pesos,LEARNING_RATE,EPOCHS)
-   # y2 = etapa_test["y"]
-   # predicted_class = np.argmax(y2, axis=1)
-   # print('Precision de TEST: %.2f' % (np.mean(predicted_class == t2)))
- 
-iniciar(numero_clases=3, numero_ejemplos=300, graficar_datos=False, 1) #set de datos originales
+    test(x3, t3, pesos) #ej 2b
+   
+iniciar(1, numero_clases=3, numero_ejemplos=300, graficar_datos=False) #set de datos originales 
 iniciar(2, numero_clases=3, numero_ejemplos=300, graficar_datos=False) #Nuevo set de datos #ej 4
-
