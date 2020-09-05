@@ -301,51 +301,85 @@ def test(x, t, pesos):
     h = resultados_feed_forward["h"]
     z = resultados_feed_forward["z"]
 
-    predicted_class = np.argmax(y, axis=1)
-    performance=(np.mean(predicted_class == t))
+    performance=(np.mean(np.square(t - x)))
     print("Eficiencia en test: ",performance)
 
-def k_fold(K, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases):
-   Lrate_list = np.linspace(0.1,LEARNING_RATE,K)
-   epochs_list = np.arange(EPOCHS,EPOCHS+1000*K,1000,dtype=int)
- 
-   p_learning_rate = {"performance": list(), "value": Lrate_list} #performance learning rate
-   p_epochs = {"performance": list(), "value": epochs_list}
-  
-   for i in range(K): #quedan fijos los epochs
-       x, t = generar_datos_clasificacion(numero_ejemplos, numero_clases)
- 
-       ret = train(x, t, pesos, Lrate_list[i], EPOCHS)
-       y = ret["y"]
-       pesos = ret["pesos"]
-     
-       predicted_class = np.argmax(y, axis=1)
-       p_learning_rate["performance"].append(np.mean(predicted_class == t))
-   
-   
-   p = p_learning_rate["performance"]
-   index = p.index(max(p)) #la maxima performance
-   LEARNING_RATE = p_learning_rate["value"][index] #best learning rate
-   #print("Best learning rate:", LEARNING_RATE)
-   #print(p_learning_rate["performance"])
- 
-   for i in range(K): #quedan fijo LEARNING RATE
-       x, t = generar_datos_clasificacion(numero_ejemplos, numero_clases)
- 
-       ret = train(x, t, pesos, LEARNING_RATE, epochs_list[i])
-       y = ret["y"]
-       pesos = ret["pesos"]
- 
-       predicted_class = np.argmax(y, axis=1)
-       p_epochs["performance"].append(np.mean(predicted_class == t))
- 
-   p = p_epochs["performance"]
-   index = p.index(max(p)) #la maxima performance
-   EPOCHS = p_epochs["value"][index] #best learning rate
-   #print("Best epochs value:", EPOCHS)
-   #print(p_epochs["performance"])
-   
-   return LEARNING_RATE, EPOCHS
+def k_fold(REGRESION,K, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases):
+    Lrate_list = np.linspace(0.1,LEARNING_RATE,K)
+    epochs_list = np.arange(EPOCHS,EPOCHS+1000*K,1000,dtype=int)
+    
+    p_learning_rate = {"performance": list(), "value": Lrate_list} #performance learning rate
+    p_epochs = {"performance": list(), "value": epochs_list}
+    
+    if REGRESION==True:
+        for i in range(K): #quedan fijos los epochs
+            x, t = generar_datos_continuos(numero_ejemplos, numero_clases)
+        
+            ret = regresion(x, t, pesos, Lrate_list[i], EPOCHS)
+            y = ret["y"]
+            pesos = ret["pesos"]
+            
+            p_learning_rate["performance"].append(np.mean(np.square(t - x)))
+        
+        p = p_learning_rate["performance"]
+        index = p.index(max(p)) #la maxima performance
+        LEARNING_RATE = p_learning_rate["value"][index] #best learning rate
+        #print("Best learning rate:", LEARNING_RATE)
+        #print(p_learning_rate["performance"])
+        
+        for i in range(K): #quedan fijo LEARNING RATE
+            x, t = generar_datos_continuos(numero_ejemplos, numero_clases)
+        
+            ret = regresion(x, t, pesos, LEARNING_RATE, epochs_list[i])
+            y = ret["y"]
+            pesos = ret["pesos"]
+        
+            p_epochs["performance"].append(np.mean(np.square(t - x)))
+        
+        p = p_epochs["performance"]
+        index = p.index(max(p)) #la maxima performance
+        EPOCHS = p_epochs["value"][index] #best learning rate
+        #print("Best epochs value:", EPOCHS)
+        #print(p_epochs["performance"])
+
+
+
+
+    else:
+        for i in range(K): #quedan fijos los epochs
+            x, t = generar_datos_clasificacion(numero_ejemplos, numero_clases)
+        
+            ret = train(x, t, pesos, Lrate_list[i], EPOCHS)
+            y = ret["y"]
+            pesos = ret["pesos"]
+            
+            predicted_class = np.argmax(y, axis=1)
+            p_learning_rate["performance"].append(np.mean(predicted_class == t))
+        
+        
+        p = p_learning_rate["performance"]
+        index = p.index(max(p)) #la maxima performance
+        LEARNING_RATE = p_learning_rate["value"][index] #best learning rate
+        #print("Best learning rate:", LEARNING_RATE)
+        #print(p_learning_rate["performance"])
+        
+        for i in range(K): #quedan fijo LEARNING RATE
+            x, t = generar_datos_clasificacion(numero_ejemplos, numero_clases)
+        
+            ret = train(x, t, pesos, LEARNING_RATE, epochs_list[i])
+            y = ret["y"]
+            pesos = ret["pesos"]
+        
+            predicted_class = np.argmax(y, axis=1)
+            p_epochs["performance"].append(np.mean(predicted_class == t))
+        
+        p = p_epochs["performance"]
+        index = p.index(max(p)) #la maxima performance
+        EPOCHS = p_epochs["value"][index] #best learning rate
+        #print("Best epochs value:", EPOCHS)
+        #print(p_epochs["performance"])
+        
+    return LEARNING_RATE, EPOCHS
 
 def iniciar(set_datos, numero_clases, numero_ejemplos, graficar_datos=False):
     if set_datos == 1:
@@ -363,6 +397,61 @@ def iniciar(set_datos, numero_clases, numero_ejemplos, graficar_datos=False):
         x2, t2 = generar_datos_continuos((int)(numero_ejemplos/5), numero_clases) #datos para validation
         x3, t3 = generar_datos_continuos((int)(numero_ejemplos/10), numero_clases) #datos para el test
 
+    if (set_datos==1 or set_datos==2):
+
+        NEURONAS_CAPA_OCULTA = 100
+        NEURONAS_ENTRADA = 2
+        pesos = inicializar_pesos(n_entrada=NEURONAS_ENTRADA, n_capa_2=NEURONAS_CAPA_OCULTA, n_capa_3=numero_clases)
+    
+        LEARNING_RATE=1
+        EPOCHS=1000
+        
+        # tt = train(x, t, pesos, LEARNING_RATE, EPOCHS)
+        # pesos = tt["pesos"] #es necesario entrenar antes de k_fold?
+
+        LEARNING_RATE, EPOCHS = k_fold(10, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases) #K=10 #ej3
+        paso = 200
+        tol = 0.025
+    
+        training = train(x, t, pesos, LEARNING_RATE, EPOCHS, paso, True)
+        lossTraining = training["lossT"]
+
+        y= training["y"]
+        print("Eficiencia en training", np.mean(np.argmax(y, axis=1) == t)) #ej 2a
+
+        #Invocar funcion para graficar
+        validation(x2, t2, pesos, LEARNING_RATE, EPOCHS, tol, paso, lossTraining) 
+    
+        #Test
+        test(x3, t3, pesos) #ej 2b
+
+    else:
+        NEURONAS_CAPA_OCULTA = 100
+        NEURONAS_ENTRADA = 1
+        pesos = inicializar_pesos(n_entrada=NEURONAS_ENTRADA, n_capa_2=NEURONAS_CAPA_OCULTA, n_capa_3=numero_clases)
+    
+        LEARNING_RATE=1
+        EPOCHS=1000
+        
+        # tt = train(x, t, pesos, LEARNING_RATE, EPOCHS)
+        # SE DEBE CAMBIAR DE GRAFICA EN K-FOLD-> ENTRAR UN PARAMETRO
+
+        LEARNING_RATE, EPOCHS = k_fold(REGRESION=True, 10, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases) #K=10 #ej3
+        paso = 200
+        tol = 0.025
+    
+        training = train(x, t, pesos, LEARNING_RATE, EPOCHS, paso, True)
+        lossTraining = training["lossT"]
+
+        y= training["y"]
+        print("Eficiencia en training", np.mean(np.argmax(y, axis=1) == t)) #ej 2a
+
+        #Invocar funcion para graficar
+        validation(x2, t2, pesos, LEARNING_RATE, EPOCHS, tol, paso, lossTraining) 
+    
+        #Test
+        test(x3, t3, pesos) #ej 2b
+
 
     if graficar_datos:
         plt.scatter(x[:, 0], x[:, 1], c=t)
@@ -373,34 +462,9 @@ def iniciar(set_datos, numero_clases, numero_ejemplos, graficar_datos=False):
 
         plt.scatter(x3[:, 0], x3[:, 1], c=t3)
         plt.show()
- 
-    NEURONAS_CAPA_OCULTA = 100
-    NEURONAS_ENTRADA = 2
-    pesos = inicializar_pesos(n_entrada=NEURONAS_ENTRADA, n_capa_2=NEURONAS_CAPA_OCULTA, n_capa_3=numero_clases)
- 
-    LEARNING_RATE=1
-    EPOCHS=1000
     
-    # tt = train(x, t, pesos, LEARNING_RATE, EPOCHS)
-    # pesos = tt["pesos"] #es necesario entrenar antes de k_fold?
-
-    LEARNING_RATE, EPOCHS = k_fold(10, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases) #K=10 #ej3
-    paso = 200
-    tol = 0.025
-   
-    training = train(x, t, pesos, LEARNING_RATE, EPOCHS, paso, True)
-    lossTraining = training["lossT"]
-
-    y= training["y"]
-    print("Eficiencia en training", np.mean(np.argmax(y, axis=1) == t)) #ej 2a
-
-   #Invocar funcion para graficar
-    validation(x2, t2, pesos, LEARNING_RATE, EPOCHS, tol, paso, lossTraining) 
-   
-    #Test
-    test(x3, t3, pesos) #ej 2b
-   
 iniciar(1, numero_clases=3, numero_ejemplos=300, graficar_datos=False) #set de datos originales 
 iniciar(2, numero_clases=3, numero_ejemplos=300, graficar_datos=False) #Nuevo set de datos #ej 4
-iniciar(3, numero_clases=1, numero_ejemplos=300, graficar_datos=False) #Nuevo set de datos #ej 5
+
+#iniciar(3, numero_clases=1, numero_ejemplos=300, graficar_datos=False) #Nuevo set de datos #ej 5
 #FALTA AGREGAR LA REGRESION
