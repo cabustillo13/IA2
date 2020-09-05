@@ -304,7 +304,7 @@ def test(x, t, pesos):
     performance=(np.mean(np.square(t - x)))
     print("Eficiencia en test: ",performance)
 
-def k_fold(REGRESION,K, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases):
+def k_fold(K, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases,REGRESION=False):
     Lrate_list = np.linspace(0.1,LEARNING_RATE,K)
     epochs_list = np.arange(EPOCHS,EPOCHS+1000*K,1000,dtype=int)
     
@@ -314,8 +314,8 @@ def k_fold(REGRESION,K, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_cl
     if REGRESION==True:
         for i in range(K): #quedan fijos los epochs
             x, t = generar_datos_continuos(numero_ejemplos, numero_clases)
-        
-            ret = regresion(x, t, pesos, Lrate_list[i], EPOCHS)
+        #regresion(x, t, pesos, learning_rate, epochs, tolerancia, paso, lossTrain)
+            ret = regresion(x, t, pesos, Lrate_list[i], EPOCHS, tol, paso, LossTrain)
             y = ret["y"]
             pesos = ret["pesos"]
             
@@ -330,7 +330,7 @@ def k_fold(REGRESION,K, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_cl
         for i in range(K): #quedan fijo LEARNING RATE
             x, t = generar_datos_continuos(numero_ejemplos, numero_clases)
         
-            ret = regresion(x, t, pesos, LEARNING_RATE, epochs_list[i])
+            ret = regresion(x, t, pesos, LEARNING_RATE, epochs_list[i], tol, paso, LossTrain)
             y = ret["y"]
             pesos = ret["pesos"]
         
@@ -341,9 +341,6 @@ def k_fold(REGRESION,K, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_cl
         EPOCHS = p_epochs["value"][index] #best learning rate
         #print("Best epochs value:", EPOCHS)
         #print(p_epochs["performance"])
-
-
-
 
     else:
         for i in range(K): #quedan fijos los epochs
@@ -409,7 +406,7 @@ def iniciar(set_datos, numero_clases, numero_ejemplos, graficar_datos=False):
         # tt = train(x, t, pesos, LEARNING_RATE, EPOCHS)
         # pesos = tt["pesos"] #es necesario entrenar antes de k_fold?
 
-        LEARNING_RATE, EPOCHS = k_fold(10, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases) #K=10 #ej3
+        LEARNING_RATE, EPOCHS = k_fold(10, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases, REGRESION=False) #K=10 #ej3
         paso = 200
         tol = 0.025
     
@@ -436,11 +433,11 @@ def iniciar(set_datos, numero_clases, numero_ejemplos, graficar_datos=False):
         # tt = train(x, t, pesos, LEARNING_RATE, EPOCHS)
         # SE DEBE CAMBIAR DE GRAFICA EN K-FOLD-> ENTRAR UN PARAMETRO
 
-        LEARNING_RATE, EPOCHS = k_fold(REGRESION=True, 10, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases) #K=10 #ej3
+        LEARNING_RATE, EPOCHS = k_fold(10, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases, REGRESION=True) #K=10 #ej3
         paso = 200
         tol = 0.025
     
-        training = train(x, t, pesos, LEARNING_RATE, EPOCHS, paso, True)
+        training = regresion(x, t, pesos, LEARNING_RATE, EPOCHS, tol, paso, True)
         lossTraining = training["lossT"]
 
         y= training["y"]
