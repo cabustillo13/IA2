@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 #Datos nuevos
-#Se propone funciones sigmoidales para notar superposicion de las clases
+#Se propone funciones gaussianas
 def generar_nuevos_datos(cantidad_ejemplos, cantidad_clases):
     x = np.zeros((cantidad_ejemplos,2))
     t = np.zeros(cantidad_ejemplos, dtype="uint8")  
@@ -17,8 +17,8 @@ def generar_nuevos_datos(cantidad_ejemplos, cantidad_clases):
         
         x[i][1] = 1/(np.sqrt(2*np.pi)*sigma[count])*np.exp(-0.5*np.power((x[i][0]/sigma[count]),2))    
 
-    # plt.scatter(x[:,0], x[:,1], c=t)
-    # plt.show()
+    #plt.scatter(x[:,0], x[:,1], c=t)
+    #plt.show()
     return x, t
 
 #Datos continuos
@@ -222,8 +222,6 @@ def validation(x, t, pesos, learning_rate, epochs, tolerancia, paso, lossTrain):
         h = resultados_feed_forward["h"]
         z = resultados_feed_forward["z"]
         
-        #clasificacion
-        
         exp_scores = np.exp(y)
         sum_exp_scores = np.sum(exp_scores, axis=1, keepdims=True)
         p = exp_scores / sum_exp_scores
@@ -244,51 +242,25 @@ def validation(x, t, pesos, learning_rate, epochs, tolerancia, paso, lossTrain):
         w2 = pesos["w2"]
         b2 = pesos["b2"]
  
-        ##ACA DEFINO EL FLAG
-        flag = False
-        
-        if flag == False:
- 
-            dL_dy = p                # Para todas las salidas, L' = p (la probabilidad)...
-            dL_dy[range(m), t] -= 1  # ... excepto para la clase correcta
-            dL_dy /= m
-            dL_dw2 = h.T.dot(dL_dy)                         # Ajuste para w2
-            dL_db2 = np.sum(dL_dy, axis=0, keepdims=True)   # Ajuste para b2
-            dL_dh = dL_dy.dot(w2.T)
-            dL_dz = dL_dh       # El calculo dL/dz = dL/dh * dh/dz. La funcion "h" es la funcion de activacion de la capa oculta,
-            dL_dz[z <= 0] = 0   # para la que usamos ReLU. La derivada de la funcion ReLU: 1(z > 0) (0 en otro caso)
-            dL_dw1 = x.T.dot(dL_dz)                         # Ajuste para w1
-            dL_db1 = np.sum(dL_dz, axis=0, keepdims=True)   # Ajuste para b1
-            w1 = w1 -learning_rate * dL_dw1 #Ajuste de pesos
-            b1 = b1 -learning_rate * dL_db1
-            w2 = w2 -learning_rate * dL_dw2
-            b2 = b2 -learning_rate * dL_db2
-            pesos["w1"] = w1 #Extraccion de pesos como variables locales
-            pesos["b1"] = b1
-            pesos["w2"] = w2
-            pesos["b2"] = b2   
+        dL_dy = p                # Para todas las salidas, L' = p (la probabilidad)...
+        dL_dy[range(m), t] -= 1  # ... excepto para la clase correcta
+        dL_dy /= m
+        dL_dw2 = h.T.dot(dL_dy)                         # Ajuste para w2
+        dL_db2 = np.sum(dL_dy, axis=0, keepdims=True)   # Ajuste para b2
+        dL_dh = dL_dy.dot(w2.T)
+        dL_dz = dL_dh       # El calculo dL/dz = dL/dh * dh/dz. La funcion "h" es la funcion de activacion de la capa oculta,
+        dL_dz[z <= 0] = 0   # para la que usamos ReLU. La derivada de la funcion ReLU: 1(z > 0) (0 en otro caso)
+        dL_dw1 = x.T.dot(dL_dz)                         # Ajuste para w1
+        dL_db1 = np.sum(dL_dz, axis=0, keepdims=True)   # Ajuste para b1
+        w1 = w1 -learning_rate * dL_dw1 #Ajuste de pesos
+        b1 = b1 -learning_rate * dL_db1
+        w2 = w2 -learning_rate * dL_dw2
+        b2 = b2 -learning_rate * dL_db2
+        pesos["w1"] = w1 #Extraccion de pesos como variables locales
+        pesos["b1"] = b1
+        pesos["w2"] = w2
+        pesos["b2"] = b2   
     
-        else:
-            
-            dL_dy = p                # Para todas las salidas, L' = p (la probabilidad)...
-            dL_dy[range(m), t] -= 1  # ... excepto para la clase correcta
-            dL_dy /= m
-            dL_dw2 = h.T.dot(dL_dy)                         # Ajuste para w2
-            dL_db2 = np.sum(dL_dy, axis=0, keepdims=True)   # Ajuste para b2
-            dL_dh = dL_dy.dot(w2.T)
-            dL_dz = dL_dh       # El calculo dL/dz = dL/dh * dh/dz. La funcion "h" es la funcion de activacion de la capa oculta,
-            dL_dz[z <= 0] = 0   # para la que usamos ReLU. La derivada de la funcion ReLU: 1(z > 0) (0 en otro caso)
-            dL_dw1 = x.T.dot(dL_dz)                         # Ajuste para w1
-            dL_db1 = np.sum(dL_dz, axis=0, keepdims=True)   # Ajuste para b1
-            w1 =w1 -learning_rate * dL_dw1 #Ajuste de pesos
-            b1 =b1 -learning_rate * dL_db1
-            w2 =w2 -learning_rate * dL_dw2
-            b2 =b2 -learning_rate * dL_db2
-            pesos["w1"] = w1 #Extraccion de pesos como variables locales
-            pesos["b1"] = b1
-            pesos["w2"] = w2
-            pesos["b2"] = b2
-            
     #len(lossTrain) es constante, mientras que len(lossValidation) varia debido a la tolerancia impuesta en la parada temprana
     #Lo que hacemos es eliminar los datos de la lista lossTrain -> si quisieramos podemos hacer un .copy() para duplicar la lista 
     #Por ahora no hace falta ese paso, porque solo necesitamos esta lista para graficar
@@ -451,7 +423,6 @@ def iniciar(set_datos, numero_clases, numero_ejemplos, graficar_datos=False):
 
         #Para regresion
         y= training["y"]
-        print(y)
         #print("Eficiencia en regresion", np.mean(np.argmax(y, axis=1) == t)) #ej 2a
             
         #Test
