@@ -404,9 +404,16 @@ def iniciar(set_datos, numero_clases, numero_ejemplos, graficar_datos=False):
         x2, t2 = generar_nuevos_datos((int)(numero_ejemplos/5), numero_clases) #datos para validation
         x3, t3 = generar_nuevos_datos((int)(numero_ejemplos/10), numero_clases) #datos para el test
     else:
+        print("Set para regresion")
         x, t = generar_datos_continuos(numero_ejemplos, numero_clases)
         x2, t2 = generar_datos_continuos((int)(numero_ejemplos/5), numero_clases) #datos para validation
         x3, t3 = generar_datos_continuos((int)(numero_ejemplos/10), numero_clases) #datos para el test
+
+    #Valores iniciales
+    LEARNING_RATE=1
+    EPOCHS=1000
+    paso = 200
+    tol = 0.025
 
     if (set_datos==1 or set_datos==2):
 
@@ -414,16 +421,11 @@ def iniciar(set_datos, numero_clases, numero_ejemplos, graficar_datos=False):
         NEURONAS_ENTRADA = 2
         pesos = inicializar_pesos(n_entrada=NEURONAS_ENTRADA, n_capa_2=NEURONAS_CAPA_OCULTA, n_capa_3=numero_clases, REGRESION=False)
     
-        LEARNING_RATE=1
-        EPOCHS=1000
-        
         # tt = train(x, t, pesos, LEARNING_RATE, EPOCHS)
         # pesos = tt["pesos"] #es necesario entrenar antes de k_fold?
 
         LEARNING_RATE, EPOCHS = k_fold(10, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases, REGRESION=False) #K=10 #ej3
-        paso = 200
-        tol = 0.025
-    
+ 
         training = train(x, t, pesos, LEARNING_RATE, EPOCHS, paso, True)
         lossTraining = training["lossT"]
 
@@ -442,42 +444,28 @@ def iniciar(set_datos, numero_clases, numero_ejemplos, graficar_datos=False):
         NEURONAS_ENTRADA = 1
         pesos = inicializar_pesos(n_entrada=NEURONAS_ENTRADA, n_capa_2=NEURONAS_CAPA_OCULTA, n_capa_3=1,REGRESION=True)
         
-        LEARNING_RATE=1
-        EPOCHS=1000
-        
         LEARNING_RATE, EPOCHS = k_fold(10, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases, REGRESION=True) #K=10 #ej3
         
-        paso = 200
-        tol = 0.025
-    
         training = regresion(x, t, pesos, LEARNING_RATE, EPOCHS, tol, paso, True)
-        
         lossTraining = training["lossT"]
 
-        flagPrueba = True
-        #Para clasificacion
-        if flagPrueba == True:
-            y= training["y"]
-            print("Eficiencia en training", np.mean(np.argmax(y, axis=1) == t)) #ej 2a
-        else:
-            print("Para regresion FALTAAAAAAAAAA")
+        #Para regresion
+        y= training["y"]
+        print(y)
+        #print("Eficiencia en regresion", np.mean(np.argmax(y, axis=1) == t)) #ej 2a
             
         #Test
         test(x3, t3, pesos) #ej 2b
 
-
     if graficar_datos:
         plt.scatter(x[:, 0], x[:, 1], c=t)
         plt.show()
-
         plt.scatter(x2[:, 0], x2[:, 1], c=t2)
         plt.show()
-
         plt.scatter(x3[:, 0], x3[:, 1], c=t3)
         plt.show()
     
-#iniciar(1, numero_clases=3, numero_ejemplos=300, graficar_datos=False) #set de datos originales 
-#iniciar(2, numero_clases=3, numero_ejemplos=300, graficar_datos=False) #Nuevo set de datos #ej 4
-
+iniciar(1, numero_clases=3, numero_ejemplos=300, graficar_datos=False) #set de datos originales 
+iniciar(2, numero_clases=3, numero_ejemplos=300, graficar_datos=False) #Nuevo set de datos #ej 4
 iniciar(3, numero_clases=1, numero_ejemplos=300, graficar_datos=False) #Nuevo set de datos #ej 5
-#FALTA AGREGAR LA REGRESION
+
