@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 def generar_datos_continuos(cantidad_ejemplos, cantidad_clases):
     FACTOR_ANGULO = 0.79
     AMPLITUD_ALEATORIEDAD = 0.1
