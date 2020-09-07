@@ -193,13 +193,12 @@ def regresion(x, t, pesos, learning_rate, epochs, tolerancia, paso=0, flag=False
         w2 = pesos["w2"]
         b2 = pesos["b2"]
         
-        dL_dy = -2*np.transpose(t-y)/m  # ... excepto para la clase correcta        
+        dL_dy = -2*np.transpose(t-y)/m  
         dL_dw2 = h.T.dot(dL_dy.T)                         # Ajuste para w2
         dL_db2 = np.sum(dL_dy, axis=0, keepdims=True)   # Ajuste para b2
         print(i)
         dL_dh = dL_dy.T.dot(w2.T)
-        # print("dl_dh ", dL_dh)
-        #Agregar la funcion sigmoide
+
         sigm=(h.T).dot(1-h)
         dL_dz = dL_dh.dot(sigm)
     
@@ -401,9 +400,7 @@ def iniciar(set_datos, numero_clases, numero_ejemplos, graficar_datos=False):
         NEURONAS_CAPA_OCULTA = 100
         NEURONAS_ENTRADA = 2
         pesos = inicializar_pesos(n_entrada=NEURONAS_ENTRADA, n_capa_2=NEURONAS_CAPA_OCULTA, n_capa_3=numero_clases, REGRESION=False)
-    
-        # tt = train(x, t, pesos, LEARNING_RATE, EPOCHS)
-        # pesos = tt["pesos"] #es necesario entrenar antes de k_fold?
+
 
         LEARNING_RATE, EPOCHS = k_fold(10, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases, REGRESION=False) #K=10 #ej3
  
@@ -423,6 +420,7 @@ def iniciar(set_datos, numero_clases, numero_ejemplos, graficar_datos=False):
         #Consideramos que set_datos=3 solo es para regresion
         NEURONAS_CAPA_OCULTA = 10
         NEURONAS_ENTRADA = 1
+        EPOCHS=1
         pesos = inicializar_pesos(n_entrada=NEURONAS_ENTRADA, n_capa_2=NEURONAS_CAPA_OCULTA, n_capa_3=1,REGRESION=True)
         
         LEARNING_RATE, EPOCHS = k_fold(10, pesos, LEARNING_RATE, EPOCHS, numero_ejemplos, numero_clases, REGRESION=True) #K=10 #ej3
