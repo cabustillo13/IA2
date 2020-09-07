@@ -23,21 +23,20 @@ def generar_nuevos_datos(cantidad_ejemplos, cantidad_clases):
 
 #Datos continuos
 def generar_datos_continuos(cantidad_ejemplos, cantidad_clases):
+    
+    x = np.zeros((cantidad_ejemplos,1))
+    t = np.zeros((cantidad_ejemplos,1), dtype="uint8")   
+    
+    AMPLITUD_ALEATORIEDAD = 0.1 
     FACTOR_ANGULO = 0.79
-    AMPLITUD_ALEATORIEDAD = 0.1
-    n = int(cantidad_ejemplos / cantidad_clases)
-
-    angulos = np.linspace(1 * np.pi * FACTOR_ANGULO, (1 + 1) * np.pi * FACTOR_ANGULO, n)
-    x = np.zeros((cantidad_ejemplos,1), dtype="uint8")
-    t = np.zeros(cantidad_ejemplos, dtype="uint8") 
-    suma = np.arange(0,cantidad_ejemplos,1)
-    z = np.arange(0,cantidad_ejemplos,1)
-
-    t = AMPLITUD_ALEATORIEDAD * (np.cos(angulos)+suma)
-    x = t + np.random.uniform(-1,1,cantidad_ejemplos)
-    x=np.reshape(cantidad_ejemplos,1)
-    #plt.plot(z, x, t)
-    #plt.show()
+    
+    for i in range(cantidad_ejemplos):
+        t[i] = AMPLITUD_ALEATORIEDAD * i + FACTOR_ANGULO
+        #x[i] = (i/300) + np.random.randint(1, 4)
+        #Es para apreciar de mejor manera la oscilacion de la curva alrededor de la regresion
+        x[i]= t[i] + np.random.randint(-2,2)
+        plt.plot(x, t)
+        plt.show()
     return x, t
 
 #Datos originales
@@ -77,14 +76,23 @@ def inicializar_pesos(n_entrada, n_capa_2, n_capa_3, REGRESION=False):
 
     return {"w1": w1, "b1": b1, "w2": w2, "b2": b2}
 
-def ejecutar_adelante(x, pesos):
-    # Funcion de entrada (a.k.a. "regla de propagacion") para la primera capa oculta
-    z = x.dot(pesos["w1"]) + pesos["b1"]
-    # Funcion de activacion ReLU para la capa oculta (h -> "hidden")
-    h = np.maximum(0, z)
-    # Salida de la red (funcion de activacion lineal). Esto incluye la salida de todas
-    # las neuronas y para todos los ejemplos proporcionados
-    y = h.dot(pesos["w2"]) + pesos["b2"]
+def ejecutar_adelante(x, pesos,REGRESION=False):
+    if REGRESION==False:
+        # Funcion de entrada (a.k.a. "regla de propagacion") para la primera capa oculta
+        z = x.dot(pesos["w1"]) + pesos["b1"]
+        # Funcion de activacion ReLU para la capa oculta (h -> "hidden")
+        h = np.maximum(0, z)
+        # Salida de la red (funcion de activacion lineal). Esto incluye la salida de todas
+        # las neuronas y para todos los ejemplos proporcionados
+        y = h.dot(pesos["w2"]) + pesos["b2"]
+    else:
+        # Funcion de entrada (a.k.a. "regla de propagacion") para la primera capa oculta
+        z = x.dot(pesos["w1"]) + pesos["b1"]
+        # Funcion de activacion ReLU para la capa oculta (h -> "hidden")
+        h = 1/(1+np.exp(-z)) #Sigmoide
+        # Salida de la red (funcion de activacion lineal). Esto incluye la salida de todas
+        # las neuronas y para todos los ejemplos proporcionados
+        y = h.dot(pesos["w2"]) + pesos["b2"] 
         
     return {"z": z, "h": h, "y": y}
 
@@ -92,69 +100,69 @@ def ejecutar_adelante(x, pesos):
 # t: salida correcta (target) para cada uno de los m ejemplos (m x 1)
 # pesos: pesos (W y b)
 def train(x, t, pesos, learning_rate, epochs, paso=0, flag=False):
-   # Cantidad de filas (i.e. cantidad de ejemplos)
-   m = np.size(x, 0)
-   loss_list = list()
-   epochs_list = list()
-   lossTraining = list()
+    # Cantidad de filas (i.e. cantidad de ejemplos)
+    m = np.size(x, 0)
+    loss_list = list()
+    epochs_list = list()
+    lossTraining = list()
  
-   for i in range(epochs):
-       resultados_feed_forward = ejecutar_adelante(x, pesos)
-       y = resultados_feed_forward["y"]
-       h = resultados_feed_forward["h"]
-       z = resultados_feed_forward["z"]
- 
-       exp_scores = np.exp(y)
-       sum_exp_scores = np.sum(exp_scores, axis=1, keepdims=True)
-       p = exp_scores / sum_exp_scores
-       loss = (1 / m) * np.sum( -np.log( p[range(m), t] ))
+    for i in range(epochs):
+        resultados_feed_forward = ejecutar_adelante(x, pesos)
+        y = resultados_feed_forward["y"]
+        h = resultados_feed_forward["h"]
+        z = resultados_feed_forward["z"]
+    
+        exp_scores = np.exp(y)
+        sum_exp_scores = np.sum(exp_scores, axis=1, keepdims=True)
+        p = exp_scores / sum_exp_scores
+        loss = (1 / m) * np.sum( -np.log( p[range(m), t] ))
 
-       if i%1000 == 0:
-        #    print("Loss epoch", i, ":", loss)
-           loss_list.append(loss)
-           epochs_list.append(i)
+        if i%1000 == 0:
+            #    print("Loss epoch", i, ":", loss)
+            loss_list.append(loss)
+            epochs_list.append(i)
+            
+        if flag and i%paso==0:
+                lossTraining.append(loss)
+    
+        w1 = pesos["w1"]
+        b1 = pesos["b1"]
+        w2 = pesos["w2"]
+        b2 = pesos["b2"]
+    
+        # Ajustamos los pesos: Backpropagation
+        dL_dy = p                # Para todas las salidas, L' = p (la probabilidad)...
+        dL_dy[range(m), t] -= 1  # ... excepto para la clase correcta
+        dL_dy /= m
+    
+        dL_dw2 = h.T.dot(dL_dy)                         # Ajuste para w2
+        dL_db2 = np.sum(dL_dy, axis=0, keepdims=True)   # Ajuste para b2
+    
+        dL_dh = dL_dy.dot(w2.T)
         
-       if flag and i%paso==0:
-            lossTraining.append(loss)
- 
-       w1 = pesos["w1"]
-       b1 = pesos["b1"]
-       w2 = pesos["w2"]
-       b2 = pesos["b2"]
- 
-       # Ajustamos los pesos: Backpropagation
-       dL_dy = p                # Para todas las salidas, L' = p (la probabilidad)...
-       dL_dy[range(m), t] -= 1  # ... excepto para la clase correcta
-       dL_dy /= m
- 
-       dL_dw2 = h.T.dot(dL_dy)                         # Ajuste para w2
-       dL_db2 = np.sum(dL_dy, axis=0, keepdims=True)   # Ajuste para b2
- 
-       dL_dh = dL_dy.dot(w2.T)
-      
-       dL_dz = dL_dh       # El calculo dL/dz = dL/dh * dh/dz. La funcion "h" es la funcion de activacion de la capa oculta,
-       dL_dz[z <= 0] = 0   # para la que usamos ReLU. La derivada de la funcion ReLU: 1(z > 0) (0 en otro caso)
- 
-       dL_dw1 = x.T.dot(dL_dz)                         # Ajuste para w1
-       dL_db1 = np.sum(dL_dz, axis=0, keepdims=True)   # Ajuste para b1
- 
-       w1 += -learning_rate * dL_dw1 #Ajuste de pesos
-       b1 += -learning_rate * dL_db1
-       w2 += -learning_rate * dL_dw2
-       b2 += -learning_rate * dL_db2
- 
-       pesos["w1"] = w1 #Extraccion de pesos como variables locales
-       pesos["b1"] = b1
-       pesos["w2"] = w2
-       pesos["b2"] = b2
-  
-   # fig, ax = plt.subplots()
-   # ax.plot(epochs_list, loss_list)
-   # ax.set(xlabel='Epochs', ylabel='Loss')
-   # ax.grid()
-   # plt.show()
- 
-   return {"y": y, "pesos": pesos, "lossT": lossTraining}
+        dL_dz = dL_dh       # El calculo dL/dz = dL/dh * dh/dz. La funcion "h" es la funcion de activacion de la capa oculta,
+        dL_dz[z <= 0] = 0   # para la que usamos ReLU. La derivada de la funcion ReLU: 1(z > 0) (0 en otro caso)
+    
+        dL_dw1 = x.T.dot(dL_dz)                         # Ajuste para w1
+        dL_db1 = np.sum(dL_dz, axis=0, keepdims=True)   # Ajuste para b1
+    
+        w1 += -learning_rate * dL_dw1 #Ajuste de pesos
+        b1 += -learning_rate * dL_db1
+        w2 += -learning_rate * dL_dw2
+        b2 += -learning_rate * dL_db2
+    
+        pesos["w1"] = w1 #Extraccion de pesos como variables locales
+        pesos["b1"] = b1
+        pesos["w2"] = w2
+        pesos["b2"] = b2
+    
+    # fig, ax = plt.subplots()
+    # ax.plot(epochs_list, loss_list)
+    # ax.set(xlabel='Epochs', ylabel='Loss')
+    # ax.grid()
+    # plt.show()
+    
+    return {"y": y, "pesos": pesos, "lossT": lossTraining}
 
 def regresion(x, t, pesos, learning_rate, epochs, tolerancia, paso=0, flag=False):
     # Cantidad de filas (i.e. cantidad de ejemplos)
@@ -163,9 +171,8 @@ def regresion(x, t, pesos, learning_rate, epochs, tolerancia, paso=0, flag=False
     epochs_list = list()
     lossRegresion = list()
     
-    cont=0
     for i in range(epochs):
-        resultados_feed_forward = ejecutar_adelante(x, pesos)
+        resultados_feed_forward = ejecutar_adelante(x, pesos,REGRESION=True)
         
         y = resultados_feed_forward["y"]
         h = resultados_feed_forward["h"]
@@ -185,35 +192,36 @@ def regresion(x, t, pesos, learning_rate, epochs, tolerancia, paso=0, flag=False
         b1 = pesos["b1"]
         w2 = pesos["w2"]
         b2 = pesos["b2"]
- 
-        dL_dy = 2*(t-y)/m  # ... excepto para la clase correcta
         
-        dL_dw2 = h.T.dot(dL_dy)                         # Ajuste para w2
+        dL_dy = -2*np.transpose(t-y)/m  # ... excepto para la clase correcta        
+        dL_dw2 = h.T.dot(dL_dy.T)                         # Ajuste para w2
         dL_db2 = np.sum(dL_dy, axis=0, keepdims=True)   # Ajuste para b2
-        
-        dL_dh = dL_dy.dot(w2)
+        print(i)
+        dL_dh = dL_dy.T.dot(w2.T)
+        # print("dl_dh ", dL_dh)
         #Agregar la funcion sigmoide
-        sigm=(1/(1 + np.exp(-x)))
-        dL_dz = dL_dh * sigm * (1-sigm)      # El calculo dL/dz = dL/dh * dh/dz. La funcion "h" es la funcion de activacion de la capa oculta,
-        
+        sigm=(h.T).dot(1-h)
+        dL_dz = dL_dh.dot(sigm)
+    
         dL_dw1 = x.T.dot(dL_dz)                         # Ajuste para w1
         dL_db1 = np.sum(dL_dz, axis=0, keepdims=True)   # Ajuste para b1
+    
         w1 = w1 -learning_rate * dL_dw1 #Ajuste de pesos
         b1 = b1 -learning_rate * dL_db1
         w2 = w2 -learning_rate * dL_dw2
         b2 = b2 -learning_rate * dL_db2
+        b2 = b2.T
         pesos["w1"] = w1 #Extraccion de pesos como variables locales
         pesos["b1"] = b1
         pesos["w2"] = w2
-        pesos["b2"] = b2   
+        pesos["b2"] = b2  
 
     return {"y": y, "pesos": pesos, "lossT": lossRegresion}
 
 def validation(x, t, pesos, learning_rate, epochs, tolerancia, paso, lossTrain):
     # Cantidad de filas (i.e. cantidad de ejemplos)
     m = np.size(x, 0)
-    loss_list = list()
-    epochs_list = list()
+
     lossValidation = list()
 
     cont=0
@@ -413,7 +421,7 @@ def iniciar(set_datos, numero_clases, numero_ejemplos, graficar_datos=False):
 
     else:
         #Consideramos que set_datos=3 solo es para regresion
-        NEURONAS_CAPA_OCULTA = 300
+        NEURONAS_CAPA_OCULTA = 10
         NEURONAS_ENTRADA = 1
         pesos = inicializar_pesos(n_entrada=NEURONAS_ENTRADA, n_capa_2=NEURONAS_CAPA_OCULTA, n_capa_3=1,REGRESION=True)
         
@@ -427,7 +435,7 @@ def iniciar(set_datos, numero_clases, numero_ejemplos, graficar_datos=False):
         #print("Eficiencia en regresion", np.mean(np.argmax(y, axis=1) == t)) #ej 2a
             
         #Test
-        test(x3, t3, pesos) #ej 2b
+        test(x3, t3, pesos,REGRESION=True) #ej 2b
 
     if graficar_datos:
         plt.scatter(x[:, 0], x[:, 1], c=t)
@@ -440,4 +448,3 @@ def iniciar(set_datos, numero_clases, numero_ejemplos, graficar_datos=False):
 #iniciar(1, numero_clases=3, numero_ejemplos=300, graficar_datos=False) #set de datos originales 
 #iniciar(2, numero_clases=3, numero_ejemplos=300, graficar_datos=False) #Nuevo set de datos #ej 4
 iniciar(3, numero_clases=1, numero_ejemplos=300, graficar_datos=False) #Nuevo set de datos #ej 5
-
