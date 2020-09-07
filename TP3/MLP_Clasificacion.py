@@ -25,7 +25,7 @@ def generar_nuevos_datos(cantidad_ejemplos, cantidad_clases):
 def generar_datos_continuos(cantidad_ejemplos, cantidad_clases):
     
     x = np.zeros((cantidad_ejemplos,1))
-    t = np.zeros((cantidad_ejemplos,1), dtype="uint8")   
+    t = np.zeros((cantidad_ejemplos,1))   
     
     AMPLITUD_ALEATORIEDAD = 0.1 
     FACTOR_ANGULO = 0.79
@@ -34,9 +34,9 @@ def generar_datos_continuos(cantidad_ejemplos, cantidad_clases):
         t[i] = AMPLITUD_ALEATORIEDAD * i + FACTOR_ANGULO
         #x[i] = (i/300) + np.random.randint(1, 4)
         #Es para apreciar de mejor manera la oscilacion de la curva alrededor de la regresion
-        x[i]= t[i] + np.random.randint(-2,2)
-        plt.plot(x, t)
-        plt.show()
+        x[i]= t[i] + np.random.uniform(-1,1)
+    plt.plot(t, x)
+    plt.show()
     return x, t
 
 #Datos originales
