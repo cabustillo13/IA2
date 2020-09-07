@@ -187,6 +187,7 @@ def regresion(x, t, pesos, learning_rate, epochs, tolerancia, paso=0, flag=False
         b2 = pesos["b2"]
  
         dL_dy = 2*(t-y)/m  # ... excepto para la clase correcta
+        
         dL_dw2 = h.T.dot(dL_dy)                         # Ajuste para w2
         dL_db2 = np.sum(dL_dy, axis=0, keepdims=True)   # Ajuste para b2
         
@@ -436,7 +437,7 @@ def iniciar(set_datos, numero_clases, numero_ejemplos, graficar_datos=False):
         plt.scatter(x3[:, 0], x3[:, 1], c=t3)
         plt.show()
     
-iniciar(1, numero_clases=3, numero_ejemplos=300, graficar_datos=False) #set de datos originales 
-iniciar(2, numero_clases=3, numero_ejemplos=300, graficar_datos=False) #Nuevo set de datos #ej 4
+#iniciar(1, numero_clases=3, numero_ejemplos=300, graficar_datos=False) #set de datos originales 
+#iniciar(2, numero_clases=3, numero_ejemplos=300, graficar_datos=False) #Nuevo set de datos #ej 4
 iniciar(3, numero_clases=1, numero_ejemplos=300, graficar_datos=False) #Nuevo set de datos #ej 5
 

@@ -6,6 +6,7 @@
 \usepackage{listings}
 \usepackage[section]{placeins}
 \usepackage[export]{adjustbox}
+\usepackage{float}
 
 \pagestyle{plain}
 \pagenumbering{arabic}
@@ -65,7 +66,7 @@ La idea del test es probar el funcionamiento del algoritmo con los valores que n
 
 Para distintas evaluaciones (test) de los algoritmos usando la función ReLU los resultados de \textit{accuracy} fueron  del orden superior a 90 \%. En cambio, usando una función sigmoidal los resultados de \textit{accuracy} son superiores a 75\%, lo cual indica que según la función sigmoidal planteada y comparando con la función ReLU, la segunda es más eficiente que la primera. Este problema se puede deber al \textit{gradient vanishing}, que significa que debido al gradiente de la función pequeño hacen falta muchas iteraciones para poder lograr valores aceptables de eficiencia durante el entrenamiento.
 
-Para poder visualizar la comparación entre los resultados obtenidos usando una u otra función se realizó un cuadro comparativo (ver tabla \ref{tabla:Cuadro comparativo}). Se debe notar que los valores pueden diferir al ejecutar nuevamente el programa ya que los valores generados cada vez que se ejecuta el programa son aleatorios.
+Para poder visualizar la comparación entre los resultados obtenidos usando una u otra función para crear el dataset se realizó un cuadro comparativo (ver tabla \ref{tabla:Cuadro comparativo}). Se debe notar que los valores pueden diferir al ejecutar nuevamente el programa ya que los valores generados cada vez que se ejecuta el programa son aleatorios.
 
 \begin{table}[h]
 \scalebox{0.84}{
@@ -83,8 +84,27 @@ Para poder visualizar la comparación entre los resultados obtenidos usando una 
 \label{tabla:Cuadro comparativo}
 \end{table}
 
+Al realizar el \textit{tunning} de parámetros se pudo observar que la respuesta obtenida mejora notablemente con la adición de neuronas en la capa oculta, pudiendo evitar el overfitting al aumentarlas en número.
+
+\begin{figure*}[h]
+    \centering
+    \begin{subfigure}[b]{0.475\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{validation-6-MLP-tp3.jpg}
+        \caption[]%
+        {{\small 100 neuronas en la capa oculta}}    
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.475\textwidth}  
+        \centering 
+        \includegraphics[width=\textwidth]{validation5-MLP-tp3.jpg}
+        \caption[]%
+        {{\small 140 neuronas en la capa oculta}}    
+    \end{subfigure}
+    \end{figure*}
+
 \section{Nuevo generador de datasets}
-Proponemos la alternativa de funciones gaussianas, para tener un mayor solapamiento entre las clases. Si se desea tener un mayor solapamiento solo se debería modificar la desvición estándar.
+Se propuso la alternativa de funciones gaussianas, para tener un mayor solapamiento entre las clases. Si se desea tener un mayor solapamiento solo se debería modificar la desvición estándar.
 
 \begin{figure}[ht]
     \centering
@@ -93,26 +113,43 @@ Proponemos la alternativa de funciones gaussianas, para tener un mayor solapamie
     \label{fig:TP3_ej3_2}
 \end{figure}
 
-Para el Set de datos original se obtuvieron los siguientes resultados:\\
+Para el Set de datos original se obtuvieron los siguientes resultados \ref{fig:TP3_ej3_2}):\\
 Eficiencia en training 0.9933333333333333\\
 Eficiencia en test:  0.9333333333333333
 
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{TP3_ej3_3.png}
-    \caption{Para set de datos original}
-    \label{fig:TP3_ej3_3}
-\end{figure}
 
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.9\textwidth]{TP3_ej3_4.png}
-    \caption{Para el nuevo set de datos}
-    \label{fig:TP3_ej3_4}
-\end{figure}
-
-Para el nuevo set de datos se obtuvieron los siguientes resultados:\\
+Para el nuevo set de datos se obtuvieron los siguientes resultados (\ref{fig:TP3_ej3_4}):\\
 Eficiencia en training 0.9466666666666667\\
 Eficiencia en test:  0.8
+\begin{figure*}[h!]
+    \centering
+    \begin{subfigure}[b]{0.475\textwidth}
+    \centering    
+        \includegraphics[width=\textwidth]{TP3_ej3_3.png}
+        \caption[]
+        \small{Para set de datos original}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.475\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{TP3_ej3_4.png}
+        \caption[]
+        \small{Para el nuevo set de datos}
+    \end{subfigure}
+    \label{fig:TP3_ej3_4}
+
+\end{figure*}
+
+\section{Regresión}
+Se representaron un dataset de funciones continuas que posteriormente se discretizaron ciertos puntos para analizar. Acá consideramos una sola entrada.\\
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth]{regresion.png}
+    \caption{Representación para el dataset de funciones continuas}
+    \label{fig:regresion}
+\end{figure}
+
+Nota: Debido a las dimensiones de las matrices utilizadas y utilizar tanto en las funciones como en sus respectivas derivadas, al momento de utilizar la transpuesta tal como se plantean en los apuntes de la cátedra, se generan conflicttos debido a que en cada iteración hace que las matrices no cuadradas cambien filas por columnas y viceversa, produciendo fallas al momento de representar la resolución del ejercicio. Detectamos dónde se encuentra el error, pero no logramos encontrar una solución a ese pequeño detalle. Consideramos que esto es una deuda técnica con nosotros mismos, y que en un futuro trataremos de solucionar para lograr implementarlo en nuestra vida profesional. 
 
 \end{document}
